@@ -149,6 +149,7 @@ void Administrador::agregarPelicula(){
     cout << "Genero:\n"; 
     p.elegirGeneros(0);
 
+    peliculas.open();
 
     peliculas.close();
 }
