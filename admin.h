@@ -1,6 +1,5 @@
 #include<iostream>
 #include<math.h>
-#include<list>
 #include <fstream>
 #include "peliculas.h"
 using namespace std;
@@ -8,53 +7,6 @@ using namespace std;
 
 class Administrador{
     private:
-        class Control{
-            private:
-                static int totPeliculas; // total de peliculas
-
-                // Contador de peliculas por genero
-                static int totDrama;
-                static int totAccion;
-                static int totRomance;
-                static int totComedia;
-                static int totCienciaFiccion;
-                static int totTerror;
-                static int totFantasia;
-                static int totOtros;    // Otros se pone como genero "no disponible"
-
-                // Lista de titulos
-                struct datosControl{
-                    char tit[TAM];  // Titulo
-                    char gen[TAM];  // genero, para conteo por genero
-                };
-                list<datosControl> listaDeTitulos;
-            public:
-                void aumentarTotPeliculas(){totPeliculas++;}
-                void disminuirTotPeliculas(){totPeliculas--;}
-                // Control de contadores por genero
-                void aumentarTotDrama(){totDrama++;}
-                void disminuirTotDrama(){totDrama--;}
-                void aumentarTotAccion(){totAccion++;} 
-                void disminuirTotAccion(){totAccion--;}
-                void aumentarTotRomance(){totRomance++;}
-                void disminuirTotRomance(){totRomance--;}
-                void aumentarTotComedia(){totComedia++;}
-                void disminuirTotComedia(){totComedia--;}
-                void aumentarTotCienciaFiccion(){totCienciaFiccion++;}
-                void disminuirTotCienciaFiccion(){totCienciaFiccion--;}
-                void aumentarTotTerror(){totTerror++;}
-                void disminuirTotTerror(){totTerror--;}
-                void aumentarTotFantasia(){totFantasia++;}
-                void disminuirTotFantasia(){totFantasia--;}
-                void aumentarTotOtros(){totOtros++;}
-                void disminuirTotOtros(){totOtros--;}
-                 
-                void setListaTitulos(){}
-
-                static int getTotPeliculas(){return totPeliculas;}
-                list<datosControl> getListaTitulos(){return listaDeTitulos;}
-                
-        };
         //Control c;
     public:
         // Control getControlador(){return c;}
@@ -140,6 +92,7 @@ void Administrador::modificarCatalogo(){
 
 void Administrador::agregarPelicula(){
     char titulo[TAM], dir[TAM], genero[TAM];
+    int aa, punt;
     Pelicula p;
 
     fstream peliculas;  
@@ -147,10 +100,27 @@ void Administrador::agregarPelicula(){
     cout << "Titulo: "; cin.getline(titulo,TAM);
     cout << "Director: "; cin.getline(dir,TAM);
     cout << "Genero:\n"; 
-    p.elegirGeneros(0);
+    strcmp(genero, p.elegirGeneros(0));
+    cout << "Anio: "; cin >> aa;
+    punt = 0;
 
-    peliculas.open();
+    Pelicula nuevo(titulo, dir, genero, aa, punt);
 
+    p.totPeliculas++;
+
+    peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
+
+    if(!peliculas) {
+        cerr << "No se pudo abrir el archivo para agregar peliculas";
+        return;
+    }
+
+    // Posicionarse dentro del archivo binario
+    peliculas.seekp((p.totPeliculas-1) * sizeof(Pelicula), ios::beg);
+
+    // Escribir en el registro una vez posicionado 
+    peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(Pelicula));
+    
     peliculas.close();
 }
 
