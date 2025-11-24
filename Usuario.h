@@ -53,15 +53,17 @@ class Usuarios{
 
         while (archivo.read((char*)&p, sizeof(Pelicula)))  {
             cout << "--------------------------------\n";
-            cout << "Titulo: " << p.titulo << "\n";
-            cout << "Director: " << p.director << "\n";
-            cout << "Genero: " << p.genero << "\n";
-            cout << "Anio: " << p.anio << "\n";
-            cout << "Puntuacion: " << p.puntuacion << "\n";
+            cout << "Titulo: " << p.getTitulo() << "\n";
+            cout << "Director: " << p.getDirector() << "\n";
+            cout << "Genero: " << p.getGenero() << "\n";
+            cout << "Anio: " << p.getAnio() << "\n";
+            cout << "Puntuacion: " << p.getPuntuacion() << "\n";
             cout << "--------------------------------\n";
         }
-    }
+
         archivo.close();
+    }
+        
 
     
     void PelMejoresVal(){
@@ -74,6 +76,8 @@ class Usuarios{
         }
 
     }
+
+
     void buscarPeliculas(){
         int opc1;
         ifstream archivo("catalogo.txt");
