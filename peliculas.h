@@ -112,18 +112,18 @@ void Pelicula::cascaronesBinarios(){
 void Pelicula::setSinopsis(char* tituloSinopsis, Pelicula nuevo){
     fstream sps;
 
-    cout << "Sinopsis de la pelicula " << tituloSinopsis << ": ";
-    cin.getline(nuevo.sinopsis,TAM);
-
-    strcat(tituloSinopsis,".txt");
-
     sps.open(tituloSinopsis, ios::out | ios::trunc);
 
     if(!sps) {
         sps.close();
-        cerr << "No se pudo abrir el archivo de sinopsis";
+        cerr << "No se pudo abrir el archivo para agregar sinopsis";
         return;
     }
+
+    cout << "Sinopsis de la pelicula " << tituloSinopsis << ": ";
+    cin.getline(nuevo.sinopsis,TAM);
+
+    strcat(tituloSinopsis,".txt");
 
     sps << nuevo.sinopsis;
 
@@ -139,7 +139,7 @@ void Pelicula::getSinopsis(char* tituloSinopsis, Pelicula nuevo){
 
     if(!sps) {
         sps.close();
-        cerr << "No se pudo abrir el archivo de sinopsis";
+        cerr << "No se pudo abrir el archivo para leer la sinopsis";
         return;
     }
 

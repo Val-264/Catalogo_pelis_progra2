@@ -6,15 +6,13 @@ using namespace std;
 
 
 class Administrador{
-    private:
-        //Control c;
     public:
         // Control getControlador(){return c;}
         void mostrarMenu();         // Mostrar menu de acciones del administrador
 
         
         //-----------FUNCIONES PARA MODIFICAR EL CATALOGO-----------
-        void crearNuevoCatalogo();
+        void crearNuevoCatalogo(); // Crea un nuevo catalogo 
         void agregarPelicula();     // Agregar una pelicula al catalogo
         void modificarCatalogo();  // Muestra un menu para elegir modificar o eleminar una pelicula del catálogo
         void modificarPelicula();  // Modificar datos de alguna pelicula
@@ -84,12 +82,12 @@ void Administrador::modificarCatalogo(){
     float opc;
     int opcion;
     do{
-        cout<<"\n------MODIFICACION DE CATALOGO-----:";
-        cout<<"\n0- Salir";
-        cout<<"\n1- Agregar pelicula"; 
-        cout<<"\n2- Modificar pelicula";
-        cout<<"\n3- Eliminar pelicula";
-        cout<<"\nElige una opcion: ";
+        cout << "\n------MODIFICACION DE CATALOGO-----:";
+        cout << "\n0- Salir";
+        cout << "\n1- Agregar pelicula"; 
+        cout << "\n2- Modificar pelicula";
+        cout << "\n3- Eliminar pelicula";
+        cout << "\nElige una opcion: ";
         cin>>opc;
 
         // Verificar entrada válida
@@ -132,6 +130,9 @@ void Administrador::agregarPelicula(){
 
     Pelicula nuevo(titulo, dir, genero, aa, punt);
 
+    // Agregar sinopsis
+    p.setSinopsis(titulo,nuevo);
+
     p.totPeliculas++;
 
     peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
@@ -142,6 +143,7 @@ void Administrador::agregarPelicula(){
         return;
     }
 
+    //-----------Grabar en el archivo binario-----------
     // Posicionarse dentro del archivo binario
     peliculas.seekp((p.totPeliculas-1) * sizeof(Pelicula), ios::beg);
 
