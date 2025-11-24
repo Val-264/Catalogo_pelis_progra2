@@ -1,6 +1,5 @@
 #include<iostream>
 #include<string.h>
-#include<vector>
 #include<fstream>
 #include<sstream>
 using namespace std;
@@ -42,7 +41,7 @@ class Pelicula{
         void setDirector(char *d){ strcpy(director, d); }
         void setGenero(char *g){ strcpy(genero, g); }
         void setAnio(int a){ anio = a; }
-        void setPuntuaxion(float p){ puntuacion = p; }
+        void setPuntuacion(float p){ puntuacion = p; }
 
         char* getTitulo(){return titulo;}
         char* getDirector(){return director;}
@@ -51,20 +50,12 @@ class Pelicula{
         float getPuntuacion(){ return puntuacion; }
 
         char* elegirGeneros(int llamada);
-        vector<char[TAM]> generos;
-        void emplaceGeneros(){
-            generos.emplace_back("Drama");
-            generos.emplace_back("Accion");
-            generos.emplace_back("Romance");
-            generos.emplace_back("Comedia");
-            generos.emplace_back("Ciencia ficcion");
-            generos.emplace_back("Terror");
-            generos.emplace_back("Fantasia");
-        }
-        void popGeneros() {
-            while(!generos.empty()) generos.pop_back();
-        }
+        char generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
 
+
+        bool catalogoVacio(); // Verificar si el catalogo está vacío 
+
+        //-----------CONTADORES DE PELICULAS-----------
         static int totPeliculas; // total de peliculas
 
         // Contador de peliculas por genero
@@ -104,6 +95,7 @@ void Pelicula::cascaronesBinarios(){
     peliculas.open(catalogo, ios::binary | ios::out | ios::trunc);
 
     if (!peliculas) {
+        peliculas.close();
         cerr << "\nNo se pudo abrir el archivo de catalogo\n";
         return; 
     }
@@ -128,6 +120,7 @@ void Pelicula::setSinopsis(char* tituloSinopsis, Pelicula nuevo){
     sps.open(tituloSinopsis, ios::out | ios::trunc);
 
     if(!sps) {
+        sps.close();
         cerr << "No se pudo abrir el archivo de sinopsis";
         return;
     }
@@ -145,6 +138,7 @@ void Pelicula::getSinopsis(char* tituloSinopsis, Pelicula nuevo){
     sps.open(tituloSinopsis, ios::in);
 
     if(!sps) {
+        sps.close();
         cerr << "No se pudo abrir el archivo de sinopsis";
         return;
     }
@@ -162,8 +156,6 @@ void Pelicula::getSinopsis(char* tituloSinopsis, Pelicula nuevo){
 char* Pelicula::elegirGeneros(int llamada){ // Si llamada = 0 es del administrador, si llamada = 1es del usuario
     char retorno[TAM];
     char otro[TAM];
-
-    emplaceGeneros();
 
     float opc;
     int opcion; 
@@ -211,9 +203,42 @@ char* Pelicula::elegirGeneros(int llamada){ // Si llamada = 0 es del administrad
 
     }
 
-    popGeneros();
-
     return retorno;
+}
+
+
+bool Pelicula::catalogoVacio() {
+    bool vacio;
+
+    fstream peliculas;
+
+    peliculas.open(catalogo, ios::binary | ios::in); // Abrir archivo para lectura 
+
+    if (!peliculas) {
+        peliculas.close();
+        cerr << "No se pudo abrir el catalogo para verificar si está vacío";
+        return;
+    }
+
+    Pelicula registro;
+
+    for (int i = 0; i < TOT_PELIS; i++) {
+        // Posicionarse en una localidad
+        peliculas.seekg(i*sizeof(Pelicula));
+
+        // extraer la cantidad bytes de sizeof y colocarlo en el registro 
+        peliculas.read(reinterpret_cast<char*>(&registro), sizeof(Pelicula));
+
+        // Los años tienen que ser mínimo 1888, por lo tanto no son 0
+        if(registro.getAnio() != 0) {
+           peliculas.close();
+           return false; 
+        }
+    }
+
+    peliculas.close();
+
+    return true;
 }
 
         
