@@ -11,11 +11,12 @@ class Usuarios{
         char director[TAM];
         char genero[TAM];
         char sinopsis[TAM*2];
+        string resenas[TAM*2];
         int anio;
         float puntuacion;
     public:
 
-    void menuUsuario(){
+    void menuUsuAaio(){
         int opc;
         do  {
             cout << " --MENU DE USUARIO--  \n";
@@ -64,11 +65,6 @@ class Usuarios{
         archivo.close();
     }
         
-//Funcion para generar las peliculas mejor valoradas
-
-    void generarPelMejoresVal(){
-
-    }
 
 
 //Funcion para mostrar las peliculas mejor valoradas
@@ -87,24 +83,18 @@ class Usuarios{
 
     void buscarPeliculas(){
         int opc1;
-        ifstream archivo("catalogo.dat", ios::binary | ios::in);
-        
-        if (!archivo.is_open()) {
-            cout << "No se puede abrir el catalogo\n";
-            return;
-        }
-
+ 
         do{
             cout << " MENU DE BUSQUEDA \n";
             cout << " 0. Salir del menu de busqueda\n ";
             cout << " 1. Buscar por genero\n ";
-            cout << " 2. Buscar por titulo\n ";
+            cout << " 2. Buscar por titulo\n ";//buscar por anio
             cout << " Selecciona tu opcion... ";
             cin >> opc1;
         } while (opc1 !=0);
 
         switch (opc1)   {
-            case 1: 
+            case 1: //´pedit titulo
                 break;
             case 2:
                 break;
