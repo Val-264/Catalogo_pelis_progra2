@@ -10,27 +10,22 @@ using namespace std;
 
 class Pelicula{
     private:
-        struct Campos_Pelicula{
-            char titulo[TAM];
-            char director[TAM];
-            char genero[TAM];
-            int anio;
-            float puntuacion;
-        };
+        char titulo[TAM];
+        char director[TAM];
+        char genero[TAM];
         char sinopsis[TAM*2];
-        Campos_Pelicula campos;     
+        int anio;
+        float puntuacion;                
     public: 
 
         Pelicula(){}
         Pelicula(char* t, char*dir, char*gen, int aa, int punt){
-            strcpy(campos.titulo,t);
-            strcpy(campos.director,dir);
-            strcpy(campos.genero,gen);
-            campos.anio = aa;
-            campos.puntuacion = punt;
+            strcpy(titulo,t);
+            strcpy(director,dir);
+            strcpy(genero,gen);
+            anio=aa;
+            puntuacion = punt;
         }
-
-        Campos_Pelicula getCamposPelicula() const {return campos;};
 
         void setSinopsis(char* tituloSinopsis, Pelicula nuevo);
         void getSinopsis(char* tituloSinopsis, Pelicula nuevo);
@@ -43,17 +38,17 @@ class Pelicula{
         void cascaronesBinarios();
 
         //-----------FUNCIONES-----------
-        void setTitulo(char *t){ strcpy(campos.titulo, t); }
-        void setDirector(char *d){ strcpy(campos.director, d); }
-        void setGenero(char *g){ strcpy(campos.genero, g); }
-        void setAnio(int a){ campos.anio = a; }
-        void setPuntuacion(float p){ campos.puntuacion = p; }
+        void setTitulo(char *t){ strcpy(titulo, t); }
+        void setDirector(char *d){ strcpy(director, d); }
+        void setGenero(char *g){ strcpy(genero, g); }
+        void setAnio(int a){ anio = a; }
+        void setPuntuacion(float p){ puntuacion = p; }
 
-        char* getTitulo() {return campos.titulo;}
-        char* getDirector(){return campos.director;}
-        char* getGenero(){ return campos.genero; }
-        int getAnio(){ return campos.anio; }
-        float getPuntuacion(){ return campos.puntuacion; }
+        char* getTitulo(){return titulo;}
+        char* getDirector(){return director;}
+        char* getGenero(){ return genero; }
+        int getAnio(){ return anio; }
+        float getPuntuacion(){ return puntuacion; }
 
         char* elegirGeneros(int llamada);
         char generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
@@ -131,7 +126,7 @@ void Pelicula::setSinopsis(char* tituloSinopsis, Pelicula nuevo){
     }
 
     cout << "Sinopsis de la pelicula " << tituloSinopsis << ": ";
-    cin.getline(nuevo.sinopsis,TAM*2);
+    cin.getline(nuevo.sinopsis,TAM);
 
     strcat(tituloSinopsis,".txt");
 
@@ -164,58 +159,45 @@ void Pelicula::getSinopsis(char* tituloSinopsis, Pelicula nuevo){
 }
 
 char* Pelicula::elegirGeneros(int llamada){ // Si llamada = 0 es del administrador, si llamada = 1es del usuario
-        char retorno[TAM];
-        bool opc_valida = false;
+    char retorno[TAM];
+    char otro[TAM];
 
-        float opc;
-        int opcion; 
+    float opc;
+    int opcion; 
 
-    do{
-        int i=1;
-        cout << "Generos de pelicula";
-        for(auto& g: generos) {
-            cout << "\n" << i << "-" << g; i++;
-        } 
-        cout << "\n8- Otro";
-        cin >> opc;
-        // Verificar entrada válida
-        if(cin.fail()){ // Si la entrada no es un numero
-		    cin.clear(); // Limpiar estado de error de cin
-			cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
-            opcion=500;
-        }
-		else if(fmod(opc,1)!=0) opcion=500; // Descartar numeros con decimales
-		else{
-             opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
-             opc_valida = true;
-        }
-    } while (!opc_valida);    
+    int i=1;
+    cout << "Generos de pelicula";
+    for(auto& g: generos) {
+        cout << "\n" << i << "-" << g; i++;
+    } 
+    cout << "\n8- Otro";
+    cin >> opc;
 
     // Para administrador: asignar un genero a una pelicula  
     if(llamada == 0) {
         switch(opcion){
-            case 1: strcpy(retorno,generos[0]); 
+            case 1: strcmp(retorno,generos[0]); 
                     totDrama++;
                     break;
-            case 2: strcpy(retorno, generos[1]); 
+            case 2: strcmp(retorno, generos[1]); 
                     totAccion++;
                     break;
-            case 3: strcpy(retorno, generos[2]); 
+            case 3: strcmp(retorno, generos[2]); 
                     totRomance++;
                     break;
-            case 4: strcpy(retorno, generos[3]); 
+            case 4: strcmp(retorno, generos[3]); 
                     totComedia++;
                     break;
-            case 5: strcpy(retorno, generos[4]); 
+            case 5: strcmp(retorno, generos[4]); 
                     totCienciaFiccion++;
                     break;
-            case 6: strcpy(retorno, generos[5]); 
+            case 6: strcmp(retorno, generos[5]); 
                     totTerror++;
                     break;
-            case 7: strcpy(retorno, generos[6]); 
+            case 7: strcmp(retorno, generos[6]); 
                     totFantasia++;
                     break;
-            case 8: strcpy(retorno, "No disponible"); 
+            case 8: strcmp(retorno, "No disponible"); 
                     totOtros++;
                     break;
         }
@@ -231,6 +213,8 @@ char* Pelicula::elegirGeneros(int llamada){ // Si llamada = 0 es del administrad
 
 
 bool Pelicula::catalogoVacio() {
+    bool vacio;
+
     fstream peliculas;
 
     peliculas.open(catalogo, ios::binary | ios::in); // Abrir archivo para lectura 
@@ -238,7 +222,7 @@ bool Pelicula::catalogoVacio() {
     if (!peliculas) {
         peliculas.close();
         cerr << "No se pudo abrir el catalogo para verificar si está vacío";
-        return true;
+        return;
     }
 
     Pelicula registro;

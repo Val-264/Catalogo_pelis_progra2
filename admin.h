@@ -145,10 +145,10 @@ void Administrador::agregarPelicula(){
 
     //-----------Grabar en el archivo binario-----------
     // Posicionarse dentro del archivo binario
-    peliculas.seekp((p.totPeliculas-1) * sizeof(p.getCamposPelicula()), ios::beg);
+    peliculas.seekp((p.totPeliculas-1) * sizeof(Pelicula), ios::beg);
 
     // Escribir en el registro una vez posicionado 
-    peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(p.getCamposPelicula()));
+    peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(Pelicula));
     
     peliculas.close();
 }
@@ -177,10 +177,10 @@ void Administrador::revisarCatalogo(){
         Pelicula registro;
         for (int i = 0; i < TOT_PELIS; i++) {
             // Posicionarse dentro del archivo binario
-            peliculas.seekg(i*sizeof(p.getCamposPelicula()));
+            peliculas.seekg(i*sizeof(Pelicula));
 
             // Extraer la cantidad de bytes de sizeof y colocarlos en el registro
-            peliculas.read(reinterpret_cast<char*>(&registro), sizeof(p.getCamposPelicula()));
+            peliculas.read(reinterpret_cast<char*>(&registro), sizeof(Pelicula));
 
             if (registro.getAnio() == 0) break; // Terminar si el año es cero (no hay películas con año = 0)
             
@@ -225,16 +225,15 @@ void Administrador::modificarPelicula() {
     bool encontrada = false; 
     // Buscar película por título 
     do {
-        // CAMABIR, MOSTRAR TODAS LAS PELICULAS Y PREGUNTAR CUAL QUIERE MODIFICAR EN VEZ DE BUSCAR POR TÍTULO 
         cout << "Titulo de la pelicula a modificar: " ;
         cin >> titulo;
 
         for (int i = 0; i < p.getTotPeliculas(); i++) {
             // Posicionarse dentro del archivo bianrio
-            peliculas.seekg(i*sizeof(p.getCamposPelicula()));
+            peliculas.seekg(i*sizeof(Pelicula));
 
             // Extraer la cantidad de bytes de sizeof y colocarlos en el registro p
-            peliculas.read(reinterpret_cast<char*>(&p), sizeof(p.getCamposPelicula()));
+            peliculas.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
 
             // Termianr la búsqueda si se encontró la película 
             if (strcmp(titulo, p.getTitulo()) == 0) {
@@ -267,10 +266,10 @@ void Administrador::modificarPelicula() {
 		        else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
 
                 // Posicionarse dentro del archivo binario 
-                peliculas.seekp(indice * sizeof(p.getCamposPelicula()));
+                peliculas.seekp(indice * sizeof(Pelicula));
 
                 // Escribir en el regsitro una vez posicionado  
-                peliculas.write(reinterpret_cast<char*>(&p),sizeof(p.getCamposPelicula()));
+                peliculas.write(reinterpret_cast<char*>(&p),sizeof(Pelicula));
 
                 // Capturar los cambios 
                 switch (opcion) {
@@ -322,8 +321,8 @@ void Administrador::modificarPelicula() {
 
         do{
             cout << "Modificar otra pelicula (S/N): ";
-            cin >> continuar;
-            continuar = toupper(opc);
+            cin >> opc;
+            opc = toupper(opc);
         }while(continuar != 'S' || continuar != 'N');
 
     }while(continuar != 'N'); // Terminar de editar los campos de las peliculas 
