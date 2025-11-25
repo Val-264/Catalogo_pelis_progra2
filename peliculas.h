@@ -10,22 +10,27 @@ using namespace std;
 
 class Pelicula{
     private:
-        char titulo[TAM];
-        char director[TAM];
-        char genero[TAM];
+        struct Campos_Pelicula{
+            char titulo[TAM];
+            char director[TAM];
+            char genero[TAM];
+            int anio;
+            float puntuacion;
+        };
         char sinopsis[TAM*2];
-        int anio;
-        float puntuacion;                
+        Campos_Pelicula campos;     
     public: 
 
         Pelicula(){}
         Pelicula(char* t, char*dir, char*gen, int aa, int punt){
-            strcpy(titulo,t);
-            strcpy(director,dir);
-            strcpy(genero,gen);
-            anio=aa;
-            puntuacion = punt;
+            strcpy(campos.titulo,t);
+            strcpy(campos.director,dir);
+            strcpy(campos.genero,gen);
+            campos.anio = aa;
+            campos.puntuacion = punt;
         }
+
+        Campos_Pelicula getCamposPelicula() const {return campos;};
 
         void setSinopsis(char* tituloSinopsis, Pelicula nuevo);
         void getSinopsis(char* tituloSinopsis, Pelicula nuevo);
@@ -38,17 +43,17 @@ class Pelicula{
         void cascaronesBinarios();
 
         //-----------FUNCIONES-----------
-        void setTitulo(char *t){ strcpy(titulo, t); }
-        void setDirector(char *d){ strcpy(director, d); }
-        void setGenero(char *g){ strcpy(genero, g); }
-        void setAnio(int a){ anio = a; }
-        void setPuntuacion(float p){ puntuacion = p; }
+        void setTitulo(char *t){ strcpy(campos.titulo, t); }
+        void setDirector(char *d){ strcpy(campos.director, d); }
+        void setGenero(char *g){ strcpy(campos.genero, g); }
+        void setAnio(int a){ campos.anio = a; }
+        void setPuntuacion(float p){ campos.puntuacion = p; }
 
-        char* getTitulo(){return titulo;}
-        char* getDirector(){return director;}
-        char* getGenero(){ return genero; }
-        int getAnio(){ return anio; }
-        float getPuntuacion(){ return puntuacion; }
+        char* getTitulo() {return campos.titulo;}
+        char* getDirector(){return campos.director;}
+        char* getGenero(){ return campos.genero; }
+        int getAnio(){ return campos.anio; }
+        float getPuntuacion(){ return campos.puntuacion; }
 
         char* elegirGeneros(int llamada);
         char generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
