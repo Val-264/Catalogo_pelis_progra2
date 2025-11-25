@@ -124,8 +124,8 @@ void Administrador::agregarPelicula(){
     do{
         cout << "Anio: "; 
         cin >> aa;
-        if (aa < 1888) cout << "Intenta de nuevo, en ese anio aun no se habian creado peliculas\n";
-    }while(aa < 1888);
+        if (aa < p.anioMinimo) cout << "Intenta de nuevo, en ese anio aun no se habian creado peliculas\n";
+    }while(aa < p.anioMinimo);
     punt = 0;
 
     Pelicula nuevo(titulo, dir, genero, aa, punt);
@@ -276,6 +276,9 @@ void Administrador::modificarPelicula() {
                     case 1: cout << "Titulo: ";
                             cin.getline(ti,TAM);
 
+                            ti[0] = toupper(ti[0]);
+                            for (size_t i = 1; i < sizeof(ti); i++) ti[i] = tolower(ti[i]);
+
                             // Grabar los cambios 
                             p.setTitulo(ti);
 
@@ -284,6 +287,8 @@ void Administrador::modificarPelicula() {
                     case 2: cout << "Director: ";
                             cin.getline(dir,TAM);
 
+                            dir[0] = toupper(dir[0]);
+                            for (size_t i = 1; i < sizeof(dir); i++) dir[i] = tolower(dir[i]);
                             // Grabar los cambios
                             p.setDirector(dir);
 
@@ -291,11 +296,15 @@ void Administrador::modificarPelicula() {
 
                     case 3: // Grabar los cambios
                             p.setGenero(p.elegirGeneros(0));
-                            
+
                             break;
 
-                    case 4: cout << "Anio: ";
-                            cin >> aa;
+                    case 4: 
+                            do{
+                                cout << "Anio: ";
+                                cin >> aa;
+                                if (aa < p.anioMinimo) cout << "Intenta de nuevo, en ese anio aun no se habian creado peliculas\n";
+                            }while(aa < p.anioMinimo);
 
                             // Grabar los cambios
                             p.setAnio(aa);
@@ -305,7 +314,7 @@ void Administrador::modificarPelicula() {
                     default: cout << "Opcion invalida\n";
                 }
         
-            } while(opcion != 0);
+            } while(opcion != 0); //Terminar de editar una pelicula 
         }
 
         else cout << "No se encontro ninguna pelicula con el título " << titulo << endl;
@@ -316,7 +325,7 @@ void Administrador::modificarPelicula() {
             opc = toupper(opc);
         }while(continuar != 'S' || continuar != 'N');
 
-    }while(continuar != 'N');
+    }while(continuar != 'N'); // Terminar de editar los campos de las peliculas 
 
     peliculas.close();
 }

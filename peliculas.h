@@ -80,6 +80,8 @@ class Pelicula{
         static int getTotTerror(){return totTerror;}
         static int getTotFantasia(){return totFantasia;}
         static int getTotOtros(){return totOtros;}
+
+        const int anioMinimo = 1888; // La primer película se grabó en 1888, por lo tanto el año mínimo para una película debe ser 1888
 };
 
 int Pelicula::totPeliculas = 0;
