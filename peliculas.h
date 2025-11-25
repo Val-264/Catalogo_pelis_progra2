@@ -2,6 +2,7 @@
 #include<string.h>
 #include<fstream>
 #include<sstream>
+#include<vector>
 using namespace std;
 
 #define TAM 500
@@ -54,6 +55,8 @@ class Pelicula{
 
 
         bool catalogoVacio(); // Verificar si el catalogo está vacío 
+
+        void generarPelMejoresVal(); // Generar archivo de peliculas mejor valoradas
 
         //-----------CONTADORES DE PELICULAS-----------
         static int totPeliculas; // total de peliculas
@@ -241,4 +244,19 @@ bool Pelicula::catalogoVacio() {
     return true;
 }
 
-        
+//Funcion para generar las peliculas mejor valoradas
+
+void Pelicula::generarPelMejoresVal(){
+    fstream catalogo, mejores;
+    catalogo.open("catalogo.dat", ios::binary | ios::in);
+    mejores.open("mejorValoradas.dat", ios::binary | ios::out | ios::trunc);
+    
+    Pelicula p;
+    if (!catalogo.is_open() || !mejores.is_open()) {
+        cout << "No se puede abrir uno de los archivos\n";
+        return;
+    }
+
+    vector <Pelicula> peliculas;
+
+}        

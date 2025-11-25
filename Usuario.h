@@ -64,6 +64,14 @@ class Usuarios{
         archivo.close();
     }
         
+//Funcion para generar las peliculas mejor valoradas
+
+    void generarPelMejoresVal(){
+
+    }
+
+
+//Funcion para mostrar las peliculas mejor valoradas
 
     
     void PelMejoresVal(){
@@ -77,31 +85,50 @@ class Usuarios{
 
     }
 
-
     void buscarPeliculas(){
         int opc1;
-        ifstream archivo("catalogo.txt");
+        ifstream archivo("catalogo.dat", ios::binary | ios::in);
         
-
         if (!archivo.is_open()) {
             cout << "No se puede abrir el catalogo\n";
             return;
         }
 
-
-
         do{
             cout << " MENU DE BUSQUEDA \n";
+            cout << " 0. Salir del menu de busqueda\n ";
             cout << " 1. Buscar por genero\n ";
-            cout << " 2. Buscar por anio\n ";
-            cout << " 3. Buscar por titulo\n ";
-            cout << " 4. Salir del menu de busqueda\n ";
+            cout << " 2. Buscar por titulo\n ";
             cout << " Selecciona tu opcion... ";
             cin >> opc1;
-        } while (opc1 !=3);
+        } while (opc1 !=0);
 
+        switch (opc1)   {
+            case 1: 
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            default:
+                break;
+        }
+    }
+    //Funciones para las opciones de buscar del menu
+    void buscarPorGenero(){
+        char generoBuscado[TAM];
+        bool encontrado = false;
+
+        cout << "\n Ingresa el genero a buscar: ";
+        cin.ignore();
+        cin.getline(generoBuscado, TAM);
         
     }
+    
+    void buscarPorTitulo(){
+        char 
+    }
+
     void setResenas(){
 
     }
