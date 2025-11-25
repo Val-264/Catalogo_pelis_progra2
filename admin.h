@@ -322,8 +322,8 @@ void Administrador::modificarPelicula() {
 
         do{
             cout << "Modificar otra pelicula (S/N): ";
-            cin >> opc;
-            opc = toupper(opc);
+            cin >> continuar;
+            continuar = toupper(opc);
         }while(continuar != 'S' || continuar != 'N');
 
     }while(continuar != 'N'); // Terminar de editar los campos de las peliculas 
