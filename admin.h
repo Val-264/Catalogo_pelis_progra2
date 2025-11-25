@@ -204,3 +204,119 @@ void Administrador::revisarCatalogo(){
     }
     
 }
+
+void Administrador::modificarPelicula() {
+    fstream peliculas;
+    Pelicula p;
+
+    peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
+
+    if (!peliculas) {
+        peliculas.close();
+        cerr << "No se pudo abrir el archivo de catalogo para edicion";
+        return;
+    }
+
+    char titulo[TAM], ti[TAM], dir[TAM];
+    char continuar;
+    int indice; // posición del registro a modificar 
+    int opcion, aa;
+    float opc;
+    bool encontrada = false; 
+    // Buscar película por título 
+    do {
+        cout << "Titulo de la pelicula a modificar: " ;
+        cin >> titulo;
+
+        for (int i = 0; i < p.getTotPeliculas(); i++) {
+            // Posicionarse dentro del archivo bianrio
+            peliculas.seekg(i*sizeof(Pelicula));
+
+            // Extraer la cantidad de bytes de sizeof y colocarlos en el registro p
+            peliculas.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
+
+            // Termianr la búsqueda si se encontró la película 
+            if (strcmp(titulo, p.getTitulo()) == 0) {
+                encontrada = true;
+                indice = i;
+                break;
+            } 
+        }
+
+        // Si se encontró la película 
+        if (encontrada) {
+            // Preguntar por el campo a modificar 
+            do {
+                cout << "\n------CAMPO A MODIFICAR-----:";
+                cout << "\n0- Volver";
+                cout << "\n1- Titulo";
+                cout << "\n2- Director";
+                cout << "\n3- Genero";
+                cout << "\n4- Anio";
+                cout << "Elige una opcion: ";
+                cin >> opc;
+
+                // Verificar entrada válida
+		        if(cin.fail()){ // Si la entrada no es un numero
+			        cin.clear(); // Limpiar estado de error de cin
+			        cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
+                    opcion=500;
+                }
+		        else if(fmod(opc,1)!=0) opcion=500; // Descartar numeros con decimales
+		        else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
+
+                // Posicionarse dentro del archivo binario 
+                peliculas.seekp(indice * sizeof(Pelicula));
+
+                // Escribir en el regsitro una vez posicionado  
+                peliculas.write(reinterpret_cast<char*>(&p),sizeof(Pelicula));
+
+                // Capturar los cambios 
+                switch (opcion) {
+                    case 1: cout << "Titulo: ";
+                            cin.getline(ti,TAM);
+
+                            // Grabar los cambios 
+                            p.setTitulo(ti);
+
+                            break;
+
+                    case 2: cout << "Director: ";
+                            cin.getline(dir,TAM);
+
+                            // Grabar los cambios
+                            p.setDirector(dir);
+
+                            break;
+
+                    case 3: // Grabar los cambios
+                            p.setGenero(p.elegirGeneros(0));
+                            
+                            break;
+
+                    case 4: cout << "Anio: ";
+                            cin >> aa;
+
+                            // Grabar los cambios
+                            p.setAnio(aa);
+
+                            break;
+
+                    default: cout << "Opcion invalida\n";
+                }
+        
+            } while(opcion != 0);
+        }
+
+        else cout << "No se encontro ninguna pelicula con el título " << titulo << endl;
+
+        do{
+            cout << "Modificar otra pelicula (S/N): ";
+            cin >> opc;
+            opc = toupper(opc);
+        }while(continuar != 'S' || continuar != 'N');
+
+    }while(continuar != 'N');
+
+    peliculas.close();
+}
