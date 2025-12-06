@@ -136,7 +136,7 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
 
     do {
         int i=1;
-        cout << "-----GENEROS-----\n";
+        cout << "-----GENEROS-----";
         for(auto& g: c.generos) {
         cout << "\n" << i << "-" << g; i++;
         } 
@@ -180,7 +180,7 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
                 c.setContadores((char*)"Total", c.generos[6]);
                 break;
         case 8: strcpy(retorno, "No disponible"); 
-                c.setContadores((char*)"Total", "Otros");
+                c.setContadores((char*)"Total", (char*)"Otros");
                 break;
     }
 }

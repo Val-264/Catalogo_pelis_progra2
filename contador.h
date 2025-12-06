@@ -23,6 +23,11 @@ class Contadores {
             strcpy(cont.nom, " ");
         }
 
+        void limpiarPantalla() {
+            system("pause");
+            system("cls");
+        }
+
         void cascaronContadores() {
             fstream contadores;
 
@@ -44,7 +49,11 @@ class Contadores {
 
         static char generos[7][TAM];
 
-        // Aumentar el total de peliculas y el total de un género específico 
+        /*
+        Aumentar el total de peliculas y el total de un género específico
+        @param total: es la palabra total para referise al total de películas
+        @param genero: nombre del genero específico 
+        */  
         void setContadores(char* total, char* genero) {
             fstream contadores;
             
