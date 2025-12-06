@@ -1,11 +1,14 @@
+#ifndef PELICULAS_H
+#define PELICULAS_H
+
 #include<iostream>
 #include<string.h>
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include "control.h"
 using namespace std;
 
-#define TAM 500
 #define TOT_PELIS 1000
 
 class Pelicula{
@@ -13,13 +16,12 @@ class Pelicula{
         char titulo[TAM];
         char director[TAM];
         char genero[TAM];
-        char sinopsis[TAM*2];
         int anio;
         float puntuacion;                
     public: 
 
         Pelicula(){}
-        Pelicula(char* t, char*dir, char*gen, int aa, int punt){
+        Pelicula(const char* t, const char*dir, const char*gen, int aa, int punt){
             strcpy(titulo,t);
             strcpy(director,dir);
             strcpy(genero,gen);
@@ -27,15 +29,15 @@ class Pelicula{
             puntuacion = punt;
         }
 
-        void setSinopsis(char* tituloSinopsis, Pelicula nuevo);
-        void getSinopsis(char* tituloSinopsis, Pelicula nuevo);
+        void setSinopsis(const char* tituloSinopsis);
+        void getSinopsis(char* tituloSinopsis);
 
         //-----------NOMBRES DE LOS ARCHIVOS-----------
-        char catalogo[13] = "catalogo.dat";
-        char tempBin[9] = "temp.dat"; // Para cuando borren una pelicula 
+        // char catalogo[13] = "catalogo.dat";
+        // char tempBin[9] = "temp.dat"; // Para cuando borren una pelicula 
 
         //-----------CASCARONES PARA LOS ARCHIVOS BINARIOS-----------
-        void cascaronesBinarios();
+        void cascaronBinario(char* archivo);
 
         //-----------FUNCIONES-----------
         void setTitulo(char *t){ strcpy(titulo, t); }
@@ -50,54 +52,19 @@ class Pelicula{
         int getAnio(){ return anio; }
         float getPuntuacion(){ return puntuacion; }
 
-        char* elegirGeneros(int llamada);
-        char generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
-
+        void elegirGeneros(char* retonro);
 
         bool catalogoVacio(); // Verificar si el catalogo está vacío 
 
         void generarPelMejoresVal(); // Generar archivo de peliculas mejor valoradas
 
-        //-----------CONTADORES DE PELICULAS-----------
-        static int totPeliculas; // total de peliculas
-
-        // Contador de peliculas por genero
-        static int totDrama;
-        static int totAccion;
-        static int totRomance;
-        static int totComedia;
-        static int totCienciaFiccion;
-        static int totTerror;
-        static int totFantasia;
-        static int totOtros;    // Otros se pone como genero "no disponible"
-
-        static int getTotPeliculas(){return totPeliculas;}
-        static int getTotDrama(){return totDrama;}
-        static int getTotAccion(){return totAccion;}
-        static int getTotRomance(){return totRomance;}
-        static int getTotComedia(){return totComedia;}
-        static int getTotCienciaFiccion(){return totCienciaFiccion;}
-        static int getTotTerror(){return totTerror;}
-        static int getTotFantasia(){return totFantasia;}
-        static int getTotOtros(){return totOtros;}
-
         const int anioMinimo = 1888; // La primer película se grabó en 1888, por lo tanto el año mínimo para una película debe ser 1888
 };
 
-int Pelicula::totPeliculas = 0;
-int Pelicula::totDrama  = 0;
-int Pelicula::totAccion  = 0;
-int Pelicula::totRomance  = 0;
-int Pelicula::totComedia = 0;
-int Pelicula::totCienciaFiccion = 0;
-int Pelicula::totTerror = 0;
-int Pelicula::totFantasia = 0;
-int Pelicula::totOtros = 0;    
-
-void Pelicula::cascaronesBinarios(){
+void Pelicula::cascaronBinario(char* archivo){
     fstream peliculas;
 
-    peliculas.open(catalogo, ios::binary | ios::out | ios::trunc);
+    peliculas.open(archivo, ios::binary | ios::out | ios::trunc);
 
     if (!peliculas) {
         peliculas.close();
@@ -114,10 +81,15 @@ void Pelicula::cascaronesBinarios(){
     peliculas.close();
 }
 
-void Pelicula::setSinopsis(char* tituloSinopsis, Pelicula nuevo){
+void Pelicula::setSinopsis(const char* tituloSinopsis){
     fstream sps;
+    char sinopsis[TAM * 2];
 
-    sps.open(tituloSinopsis, ios::out | ios::trunc);
+    char tituloSps[TAM];
+    strcpy(tituloSps, tituloSinopsis);
+    strcat(tituloSps,".txt");
+
+    sps.open(tituloSps, ios::out | ios::trunc);
 
     if(!sps) {
         sps.close();
@@ -126,16 +98,14 @@ void Pelicula::setSinopsis(char* tituloSinopsis, Pelicula nuevo){
     }
 
     cout << "Sinopsis de la pelicula " << tituloSinopsis << ": ";
-    cin.getline(nuevo.sinopsis,TAM);
+    cin.getline(sinopsis,TAM);
 
-    strcat(tituloSinopsis,".txt");
-
-    sps << nuevo.sinopsis;
+    sps << sinopsis;
 
     sps.close();
 }
 
-void Pelicula::getSinopsis(char* tituloSinopsis, Pelicula nuevo){
+void Pelicula::getSinopsis(char* tituloSinopsis){
     fstream sps;
 
     strcat(tituloSinopsis,".txt");
@@ -158,92 +128,76 @@ void Pelicula::getSinopsis(char* tituloSinopsis, Pelicula nuevo){
     sps.close();
 }
 
-char* Pelicula::elegirGeneros(int llamada){ // Si llamada = 0 es del administrador, si llamada = 1es del usuario
-    char retorno[TAM];
-    char otro[TAM];
+void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administrador, si llamada = 1es del usuario
+    Contadores c;
 
     float opc;
     int opcion; 
 
-    int i=1;
-    cout << "Generos de pelicula";
-    for(auto& g: generos) {
+    do {
+        int i=1;
+        cout << "-----GENEROS-----";
+        for(auto& g: c.generos) {
         cout << "\n" << i << "-" << g; i++;
-    } 
-    cout << "\n8- Otro";
-    cin >> opc;
-
-    // Para administrador: asignar un genero a una pelicula  
-    if(llamada == 0) {
-        switch(opcion){
-            case 1: strcmp(retorno,generos[0]); 
-                    totDrama++;
-                    break;
-            case 2: strcmp(retorno, generos[1]); 
-                    totAccion++;
-                    break;
-            case 3: strcmp(retorno, generos[2]); 
-                    totRomance++;
-                    break;
-            case 4: strcmp(retorno, generos[3]); 
-                    totComedia++;
-                    break;
-            case 5: strcmp(retorno, generos[4]); 
-                    totCienciaFiccion++;
-                    break;
-            case 6: strcmp(retorno, generos[5]); 
-                    totTerror++;
-                    break;
-            case 7: strcmp(retorno, generos[6]); 
-                    totFantasia++;
-                    break;
-            case 8: strcmp(retorno, "No disponible"); 
-                    totOtros++;
-                    break;
+        } 
+        cout << "\n8- Otro";
+        cin >> opc;
+        // Verificar entrada válida
+		if (cin.fail()){ // Si la entrada no es un numero
+			cin.clear(); // Limpiar estado de error de cin
+			cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
+            opcion=500;
+            cout << "\nOpcion invalida\n";
         }
+		else if (fmod(opc,1)!=0) { // Descartar numeros con decimales
+            opcion=500; 
+            cout << "\nOpcion invalida\n";
+        }
+		else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
+
+    } while(opcion != 0);
+
+    switch(opcion){
+        case 1: strcpy(retorno, c.generos[0]); 
+                c.setContadores((char*)"Total", c.generos[0], INCREMENTAR);
+                break;
+        case 2: strcpy(retorno, c.generos[1]); 
+                c.setContadores((char*)"Total", c.generos[1], INCREMENTAR);
+                break;
+        case 3: strcpy(retorno, c.generos[2]); 
+                c.setContadores((char*)"Total", c.generos[2], INCREMENTAR);
+                break;
+        case 4: strcpy(retorno, c.generos[3]); 
+                c.setContadores((char*)"Total", c.generos[3], INCREMENTAR);
+                break;
+        case 5: strcpy(retorno, c.generos[4]); 
+                c.setContadores((char*)"Total", c.generos[4], INCREMENTAR);
+                break;
+        case 6: strcpy(retorno, c.generos[5]); 
+                c.setContadores((char*)"Total", c.generos[5], INCREMENTAR);
+                break;
+        case 7: strcpy(retorno, c.generos[6]); 
+                c.setContadores((char*)"Total", c.generos[6], INCREMENTAR);
+                break;
+        case 8: strcpy(retorno, "No disponible"); 
+                c.setContadores((char*)"Total", (char*)"Otros", INCREMENTAR);
+                break;
     }
-
-    // Para usuario: elegir un genro para buscar 
-    else {
-
-    }
-
-    return retorno;
 }
 
-
 bool Pelicula::catalogoVacio() {
-    bool vacio;
 
     fstream peliculas;
 
-    peliculas.open(catalogo, ios::binary | ios::in); // Abrir archivo para lectura 
+    peliculas.open("catalogo.dat", ios::binary | ios::in); // Abrir archivo para lectura 
 
     if (!peliculas) {
         peliculas.close();
-        cerr << "No se pudo abrir el catalogo para verificar si está vacío";
-        return;
+        cerr << "No hay catalogo creado";
+        return true;
     }
-
-    Pelicula registro;
-
-    for (int i = 0; i < TOT_PELIS; i++) {
-        // Posicionarse en una localidad
-        peliculas.seekg(i*sizeof(Pelicula));
-
-        // extraer la cantidad bytes de sizeof y colocarlo en el registro 
-        peliculas.read(reinterpret_cast<char*>(&registro), sizeof(Pelicula));
-
-        // Los años tienen que ser mínimo 1888, por lo tanto no son 0
-        if(registro.getAnio() != 0) {
-           peliculas.close();
-           return false; 
-        }
-    }
-
     peliculas.close();
-
-    return true;
+    return false;
 }
 
 //Funcion para generar las peliculas mejor valoradas
@@ -261,4 +215,6 @@ void Pelicula::generarPelMejoresVal(){
 
     vector <Pelicula> peliculas;
 
-}        
+}     
+
+#endif
