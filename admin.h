@@ -47,7 +47,7 @@ void Administrador::mostrarMenu(){
 		else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
 
         switch (opcion){
-            case 1: crearNuevoCatalogo();
+            case 1: crearNuevoCatalogo(); break;
             case 2: modificarCatalogo(); break;
             case 3: revisarCatalogo(); break;
             case 0: cout<<"Saliendo...";
@@ -63,7 +63,9 @@ void Administrador::crearNuevoCatalogo(){
     // Verificar que no haya un catalogo exitente 
     // Elegir entre conservar el catalogo actual (si ya existía uno) o crear uno nuevo 
     Pelicula p;
+    Contadores c;
     char opc;
+
     if (!p.catalogoVacio()) {
         do{
             cout << "Ya hay un catalogo existente, deseas conservarlo?(S/N)";
@@ -72,10 +74,16 @@ void Administrador::crearNuevoCatalogo(){
         } while(opc != 'S' || opc != 'N');
 
         if (opc == 'S') return;
-        else p.cascaronesBinarios();
+        else {
+            p.cascaronCatalogo();
+            c.cascaronContadores();
+        }
 
     }
-    else p.cascaronesBinarios();
+    else {
+        p.cascaronCatalogo();
+        c.cascaronContadores();
+    }
 }
 
 void Administrador::modificarCatalogo(){
@@ -129,11 +137,10 @@ void Administrador::agregarPelicula(){
     punt = 0;
 
     Pelicula nuevo(titulo, dir, genero, aa, punt);
+    Contadores c;
 
     // Agregar sinopsis
-    p.setSinopsis(titulo,nuevo);
-
-    p.totPeliculas++;
+    p.setSinopsis(titulo);
 
     peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
 
@@ -145,7 +152,7 @@ void Administrador::agregarPelicula(){
 
     //-----------Grabar en el archivo binario-----------
     // Posicionarse dentro del archivo binario
-    peliculas.seekp((p.totPeliculas-1) * sizeof(Pelicula), ios::beg);
+    peliculas.seekp((c.getContador("Total") - 1) * sizeof(Pelicula), ios::beg);
 
     // Escribir en el registro una vez posicionado 
     peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(Pelicula));
@@ -208,6 +215,7 @@ void Administrador::revisarCatalogo(){
 void Administrador::modificarPelicula() {
     fstream peliculas;
     Pelicula p;
+    Contadores c;
 
     peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
 
@@ -228,7 +236,7 @@ void Administrador::modificarPelicula() {
         cout << "Titulo de la pelicula a modificar: " ;
         cin >> titulo;
 
-        for (int i = 0; i < p.getTotPeliculas(); i++) {
+        for (int i = 0; i < c.getContador("Total"); i++) {
             // Posicionarse dentro del archivo bianrio
             peliculas.seekg(i*sizeof(Pelicula));
 
