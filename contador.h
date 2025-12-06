@@ -1,5 +1,10 @@
+#ifndef CONTADOR_H
+#define CONTADOR_H
+
 #include <iostream>
 #include <fstream>
+#include <climits>
+#include <cstring>
 using namespace std;
 
 #define TAM 500
@@ -15,7 +20,7 @@ class Contadores {
     public:
         Contadores() {
             cont.total = 0;
-            strcmp(cont.nom, " ");
+            strcpy(cont.nom, " ");
         }
 
         void cascaronContadores() {
@@ -37,7 +42,7 @@ class Contadores {
 
         }
 
-        char generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
+        static char generos[7][TAM];
 
         // Aumentar el total de peliculas y el total de un género específico 
         void setContadores(char* total, char* genero) {
@@ -90,28 +95,27 @@ class Contadores {
 
         int getContador(char* nomContador) {
             fstream contadores;
-            int contador;
 
             // Abrir archivo para lectura 
             contadores.open("contadores.dat", ios::binary | ios::in);
 
             if(!contadores) {
                 cerr << "\nNo se puedo abrir el archivo de contadores\n";
-                return;
+                return INT_MAX;
             }
 
             while (contadores.read(reinterpret_cast<char*>(&cont), sizeof(Contador))) {
-                int posicion = 0;
-
                 // Retornar el contador si se encuentra 
                 if (strcmp(cont.nom, nomContador) == 0) {
-                    return cont.total;
+                    contadores.close();
+                    return cont.total; // Regresar contador 
                 }
-            }         
-
-            contadores.close();
-
-            // Regresar el contador 
-            return contador;
+            }       
+            
+            return -1;
         }
 };
+
+char Contadores::generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
+
+#endif

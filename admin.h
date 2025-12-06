@@ -1,3 +1,6 @@
+#ifndef ADMIN_H
+#define ADMIN_H
+
 #include<iostream>
 #include<math.h>
 #include <fstream>
@@ -125,10 +128,11 @@ void Administrador::agregarPelicula(){
 
     fstream peliculas;  
     
+    cin.ignore();
     cout << "Titulo: "; cin.getline(titulo,TAM);
     cout << "Director: "; cin.getline(dir,TAM);
     cout << "Genero:\n"; 
-    strcmp(genero, p.elegirGeneros(0));
+    p.elegirGeneros(genero);
     do{
         cout << "Anio: "; 
         cin >> aa;
@@ -142,7 +146,7 @@ void Administrador::agregarPelicula(){
     // Agregar sinopsis
     p.setSinopsis(titulo);
 
-    peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
+    peliculas.open("catalogo.dat", ios::binary | ios::in | ios::out);
 
     if(!peliculas) {
         peliculas.close();
@@ -152,12 +156,16 @@ void Administrador::agregarPelicula(){
 
     //-----------Grabar en el archivo binario-----------
     // Posicionarse dentro del archivo binario
-    peliculas.seekp((c.getContador("Total") - 1) * sizeof(Pelicula), ios::beg);
+    peliculas.seekp((c.getContador((char*)"Total") - 1) * sizeof(Pelicula), ios::beg);
 
     // Escribir en el registro una vez posicionado 
     peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(Pelicula));
     
     peliculas.close();
+}
+
+void Administrador::eliminarPelicula() {
+
 }
 
 //-----------FUNCIONES PARA REVISAR EL CATALOGO-----------
@@ -171,7 +179,7 @@ void Administrador::revisarCatalogo(){
     else {
         fstream peliculas;
 
-        peliculas.open(p.catalogo, ios::binary | ios::in);
+        peliculas.open("catalogo.dat", ios::binary | ios::in);
 
         if (!peliculas) {
             peliculas.close();
@@ -217,7 +225,7 @@ void Administrador::modificarPelicula() {
     Pelicula p;
     Contadores c;
 
-    peliculas.open(p.catalogo, ios::binary | ios::in | ios::out);
+    peliculas.open("catalogo.dat", ios::binary | ios::in | ios::out);
 
     if (!peliculas) {
         peliculas.close();
@@ -236,7 +244,7 @@ void Administrador::modificarPelicula() {
         cout << "Titulo de la pelicula a modificar: " ;
         cin >> titulo;
 
-        for (int i = 0; i < c.getContador("Total"); i++) {
+        for (int i = 0; i < c.getContador((char*)"Total"); i++) {
             // Posicionarse dentro del archivo bianrio
             peliculas.seekg(i*sizeof(Pelicula));
 
@@ -302,11 +310,13 @@ void Administrador::modificarPelicula() {
 
                             break;
 
-                    case 3: // Grabar los cambios
-                            p.setGenero(p.elegirGeneros(0));
+                    case 3: { // Grabar los cambios
+                            char retorno[TAM];
+                            p.elegirGeneros(retorno);
+                            p.setGenero(retorno);
 
                             break;
-
+                         }
                     case 4: 
                             do{
                                 cout << "Anio: ";
@@ -329,11 +339,13 @@ void Administrador::modificarPelicula() {
 
         do{
             cout << "Modificar otra pelicula (S/N): ";
-            cin >> opc;
-            opc = toupper(opc);
+            cin >> continuar;
+            continuar = toupper(continuar);
         }while(continuar != 'S' || continuar != 'N');
 
     }while(continuar != 'N'); // Terminar de editar los campos de las peliculas 
 
     peliculas.close();
 }
+
+#endif
