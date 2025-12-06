@@ -6,7 +6,7 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
-#include "contador.h"
+#include "control.h"
 using namespace std;
 
 #define TOT_PELIS 1000
@@ -37,7 +37,7 @@ class Pelicula{
         // char tempBin[9] = "temp.dat"; // Para cuando borren una pelicula 
 
         //-----------CASCARONES PARA LOS ARCHIVOS BINARIOS-----------
-        void cascaronCatalogo();
+        void cascaronBinario(char* archivo);
 
         //-----------FUNCIONES-----------
         void setTitulo(char *t){ strcpy(titulo, t); }
@@ -61,10 +61,10 @@ class Pelicula{
         const int anioMinimo = 1888; // La primer película se grabó en 1888, por lo tanto el año mínimo para una película debe ser 1888
 };
 
-void Pelicula::cascaronCatalogo(){
+void Pelicula::cascaronBinario(char* archivo){
     fstream peliculas;
 
-    peliculas.open("catalogo.dat", ios::binary | ios::out | ios::trunc);
+    peliculas.open(archivo, ios::binary | ios::out | ios::trunc);
 
     if (!peliculas) {
         peliculas.close();
@@ -159,28 +159,28 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
 
     switch(opcion){
         case 1: strcpy(retorno, c.generos[0]); 
-                c.setContadores((char*)"Total", c.generos[0]);
+                c.setContadores((char*)"Total", c.generos[0], INCREMENTAR);
                 break;
         case 2: strcpy(retorno, c.generos[1]); 
-                c.setContadores((char*)"Total", c.generos[1]);
+                c.setContadores((char*)"Total", c.generos[1], INCREMENTAR);
                 break;
         case 3: strcpy(retorno, c.generos[2]); 
-                c.setContadores((char*)"Total", c.generos[2]);
+                c.setContadores((char*)"Total", c.generos[2], INCREMENTAR);
                 break;
         case 4: strcpy(retorno, c.generos[3]); 
-                c.setContadores((char*)"Total", c.generos[3]);
+                c.setContadores((char*)"Total", c.generos[3], INCREMENTAR);
                 break;
         case 5: strcpy(retorno, c.generos[4]); 
-                c.setContadores((char*)"Total", c.generos[4]);
+                c.setContadores((char*)"Total", c.generos[4], INCREMENTAR);
                 break;
         case 6: strcpy(retorno, c.generos[5]); 
-                c.setContadores((char*)"Total", c.generos[5]);
+                c.setContadores((char*)"Total", c.generos[5], INCREMENTAR);
                 break;
         case 7: strcpy(retorno, c.generos[6]); 
-                c.setContadores((char*)"Total", c.generos[6]);
+                c.setContadores((char*)"Total", c.generos[6], INCREMENTAR);
                 break;
         case 8: strcpy(retorno, "No disponible"); 
-                c.setContadores((char*)"Total", (char*)"Otros");
+                c.setContadores((char*)"Total", (char*)"Otros", INCREMENTAR);
                 break;
     }
 }

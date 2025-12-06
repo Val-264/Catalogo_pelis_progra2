@@ -54,7 +54,7 @@ void Administrador::mostrarMenu(){
             case 1: crearNuevoCatalogo(); break;
             case 2: modificarCatalogo(); break;
             case 3: revisarCatalogo(); break;
-            case 0: cout<<"Saliendo...";
+            case 0: cout<<"Saliendo..."; break;
             default: cout<<"Opcion invalida\n";
         }
 
@@ -72,22 +72,22 @@ void Administrador::crearNuevoCatalogo(){
 
     if (!p.catalogoVacio()) {
         do{
-            cout << "Ya hay un catalogo existente, deseas conservarlo?(S/N)";
+            cout << "Ya hay un catalogo existente, deseas conservarlo?(S/N): ";
             cin >> opc;
             opc = toupper(opc);
-        } while(opc != 'S' || opc != 'N');
+        } while(opc != 'S' && opc != 'N'); // CORREGIDO: usar && en lugar de ||
 
         if (opc == 'S') return;
         else {
-            p.cascaronCatalogo();
+            p.cascaronBinario((char*)"catalogo.dat");
             c.cascaronContadores();
         }
-
     }
     else {
-        p.cascaronCatalogo();
+        p.cascaronBinario((char*)"catalogo.dat");
         c.cascaronContadores();
     }
+    c.limpiarPantalla();
 }
 
 void Administrador::modificarCatalogo(){
@@ -115,7 +115,7 @@ void Administrador::modificarCatalogo(){
             case 1: agregarPelicula(); break;
             case 2: modificarPelicula(); break;
             case 3: eliminarPelicula(); break;
-            case 0: cout<<"Saliendo...";
+            case 0: cout<<"Saliendo..."; break;
             default: cout<<"Opcion invalida\n";
         }
 
@@ -156,25 +156,115 @@ void Administrador::agregarPelicula(){
     }
 
     //-----------Grabar en el archivo binario-----------
+    // Obtener total de películas
+    int total = c.getContador((char*)"Total");
+    if (total < 0) total = 0; // Si es la primera película
+    
     // Posicionarse dentro del archivo binario
-    peliculas.seekp((c.getContador((char*)"Total") - 1) * sizeof(Pelicula), ios::beg);
+    peliculas.seekp(total * sizeof(Pelicula), ios::beg); // CORREGIDO: usar total en lugar de total-1
 
     // Escribir en el registro una vez posicionado 
     peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(Pelicula));
     
     peliculas.close();
+    
+    // Actualizar contadores
+    c.setContadores((char*)"Total", genero, INCREMENTAR);
+    
+    c.limpiarPantalla();
 }
 
 void Administrador::eliminarPelicula() {
+    char titPeli[TAM];
+    Contadores c;
+    
+    // Elegir título (solo una vez)
+    cout << "Elige el titulo de la pelicula a eliminar:\n";
+    int indice = elegirTitulos(titPeli);
+    
+    if (indice <= 0) {
+        cout << "No se selecciono ninguna pelicula.\n";
+        c.limpiarPantalla();
+        return;
+    }
+    
+    fstream catalogo;
+    fstream temporal;
+    Pelicula p; 
+    
+    // Crear archivo temporal 
+    p.cascaronBinario((char*)"temp.dat");
 
+    catalogo.open("catalogo.dat", ios::binary | ios::in); // Abrir catalogo para lectura 
+    if(!catalogo) {
+        cerr << "\nNo se puedo abrir el catalogo para eliminar pelicula\n";
+        c.limpiarPantalla();
+        return;
+    }
+    
+    temporal.open("temp.dat", ios::binary | ios::out | ios::app); // Abrir archivo temporal para escritura
+    if(!temporal) {
+        cerr << "\nNo se puedo abrir el archivo temporal para eliminar pelicula\n";
+        catalogo.close();
+        c.limpiarPantalla();
+        return;
+    }
+
+    int cont = 1;
+    int totPermanecen = 0;
+    Pelicula peliculaActual;
+    char generoEliminado[TAM];
+    bool encontrada = false;
+    
+    int totalPelis = c.getContador((char*)"Total");
+    
+    // Recorrer todas las películas
+    for (int i = 0; i < totalPelis; i++) {
+        catalogo.seekg(i * sizeof(Pelicula));
+        catalogo.read(reinterpret_cast<char*>(&peliculaActual), sizeof(Pelicula));
+        
+        // Verificar si es la película a eliminar
+        if (strcmp(peliculaActual.getTitulo(), titPeli) == 0) {
+            encontrada = true;
+            strcpy(generoEliminado, peliculaActual.getGenero());
+            cout << "Pelicula: " << peliculaActual.getTitulo() << " eliminada\n";
+        }
+        else { // Si no es la pelicula pasarla al temporal
+            // Posicionarse dentro del archivo binario 
+            temporal.seekp(totPermanecen * sizeof(Pelicula));
+            // Escribir en el archivo binario 
+            temporal.write(reinterpret_cast<char*>(&peliculaActual), sizeof(Pelicula));
+            totPermanecen++;
+        }
+        cont++;
+    }
+
+    catalogo.close();
+    temporal.close();
+
+    if (encontrada) {
+        // Disminuir contadores 
+        c.setContadores((char*)"Total", generoEliminado, DECREMENTAR);
+
+        remove("catalogo.dat"); // Borrar el catalogo anterior
+        rename("temp.dat", "catalogo.dat"); // Renombrar el temporal como nuevo catalogo
+        cout << "\nPelicula eliminada exitosamente. Peliculas restantes: " << totPermanecen << endl;
+    } else {
+        remove("temp.dat"); // Eliminar archivo temporal si no se encontró la película
+        cout << "\nNo se encontro la pelicula: " << titPeli << endl;
+    }
+
+    c.limpiarPantalla();
 }
 
 //-----------FUNCIONES PARA REVISAR EL CATALOGO-----------
 void Administrador::revisarCatalogo(){
     Pelicula p;
+    Contadores c;
 
     if (p.catalogoVacio()) {
         cout << "No hay peliculas registradas, el catalogo esta vacio";
+        c.limpiarPantalla();
         return;
     }
     else {
@@ -185,14 +275,18 @@ void Administrador::revisarCatalogo(){
         if (!peliculas) {
             peliculas.close();
             cerr << "No se pudo abrir el catalogo para revision";
+            c.limpiarPantalla();
             return;
         }
+        
         char opc; 
         do {
             cout << "Peliculas existentes en el catalogo:\n";
             cout << "--------------------------------";
             Pelicula registro;
-            for (int i = 0; i < TOT_PELIS; i++) {
+            int totalPelis = c.getContador((char*)"Total");
+            
+            for (int i = 0; i < totalPelis; i++) {
                 // Posicionarse dentro del archivo binario
                 peliculas.seekg(i*sizeof(Pelicula));
 
@@ -211,18 +305,19 @@ void Administrador::revisarCatalogo(){
         
             cout << "\n\n";
             do {
-                cout << "\nFinalizar revision? (S/N)";
+                cout << "\nFinalizar revision? (S/N): ";
                 cin >> opc;
                 opc = toupper(opc);
-                if (opc != 'S' || opc != 'N') cout << "\nOpcion invalida\n";
-                system("pause");
-                system("cls");
-            }while(opc != 'S' || opc != 'N');
-        }while (opc != 'N');
+                if (opc != 'S' && opc != 'N') { // CORREGIDO: usar && en lugar de ||
+                    cout << "\nOpcion invalida\n";
+                }
+                c.limpiarPantalla();
+            } while(opc != 'S' && opc != 'N'); // CORREGIDO: usar && en lugar de ||
+            
+        } while (opc == 'N'); // CORREGIDO: continuar mientras sea 'N'
 
         peliculas.close();
     }
-    
 }
 
 void Administrador::modificarPelicula() {
@@ -245,9 +340,18 @@ void Administrador::modificarPelicula() {
     float opc;
 
     do {
-
-
+        // Elegir película a modificar
         indice = elegirTitulos(titulo);
+        
+        if (indice <= 0) {
+            cout << "No se selecciono pelicula.\n";
+            c.limpiarPantalla();
+            return;
+        }
+
+        // Leer la película seleccionada (CORREGIDO: leer antes de modificar)
+        peliculas.seekg((indice - 1) * sizeof(Pelicula)); // CORREGIDO: paréntesis
+        peliculas.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
 
         // Preguntar por el campo a modificar 
         do {
@@ -257,7 +361,7 @@ void Administrador::modificarPelicula() {
             cout << "\n2- Director";
             cout << "\n3- Genero";
             cout << "\n4- Anio";
-            cout << "Elige una opcion: ";
+            cout << "\nElige una opcion: ";
             cin >> opc;
 
             // Verificar entrada válida
@@ -270,75 +374,72 @@ void Administrador::modificarPelicula() {
             else if(opc < 0 || opc > 4) opcion = 500; // Fuera de rango 
 		    else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
 
-            // Posicionarse dentro del archivo binario 
-            peliculas.seekp(indice * sizeof(Pelicula));
-
-            // Escribir en el regsitro una vez posicionado  
-            peliculas.write(reinterpret_cast<char*>(&p),sizeof(Pelicula));
-
             // Capturar los cambios 
             switch (opcion) {
-                case 0: break;
-                case 1: cout << "Titulo: ";
-                        cin.getline(ti,TAM);
+                case 0: 
+                    break;
+                case 1: 
+                    cout << "Nuevo Titulo: ";
+                    cin.ignore();
+                    cin.getline(ti, TAM);
+                    ti[0] = toupper(ti[0]);
+                    for (size_t i = 1; i < strlen(ti); i++) ti[i] = tolower(ti[i]);
+                    // Grabar los cambios 
+                    p.setTitulo(ti);
+                    break;
 
-                        ti[0] = toupper(ti[0]);
-                        for (size_t i = 1; i < sizeof(ti); i++) ti[i] = tolower(ti[i]);
-
-                        // Grabar los cambios 
-                        p.setTitulo(ti);
-
-                        break;
-
-                case 2: cout << "Director: ";
-                        cin.getline(dir,TAM);
-
-                        dir[0] = toupper(dir[0]);
-                        for (size_t i = 1; i < sizeof(dir); i++) dir[i] = tolower(dir[i]);
-                        // Grabar los cambios
-                        p.setDirector(dir);
-
-                        break;
+                case 2: 
+                    cout << "Nuevo Director: ";
+                    cin.ignore();
+                    cin.getline(dir, TAM);
+                    dir[0] = toupper(dir[0]);
+                    for (size_t i = 1; i < strlen(dir); i++) dir[i] = tolower(dir[i]);
+                    // Grabar los cambios
+                    p.setDirector(dir);
+                    break;
 
                 case 3: { // Grabar los cambios
                         char retorno[TAM];
                         p.elegirGeneros(retorno);
                         p.setGenero(retorno);
-
                         break;
                         }
                 case 4: 
                         do{
-                            cout << "Anio: ";
+                            cout << "Nuevo Anio: ";
                             cin >> aa;
                             if (aa < p.anioMinimo) cout << "Intenta de nuevo, en ese anio aun no se habian creado peliculas\n";
                         }while(aa < p.anioMinimo);
-
                         // Grabar los cambios
                         p.setAnio(aa);
-
                         break;
 
-                default: cout << "Opcion invalida\n";
+                default: 
+                    cout << "Opcion invalida\n";
+                    continue;
             }
             
-            system("pause");
-            system("cls");
+            // Escribir cambios si no es opción 0
+            if (opcion != 0) {
+                peliculas.seekp((indice - 1) * sizeof(Pelicula)); // CORREGIDO: paréntesis
+                peliculas.write(reinterpret_cast<char*>(&p), sizeof(Pelicula));
+                cout << "Cambios guardados exitosamente.\n";
+            }
+            
+            c.limpiarPantalla();
         } while(opcion != 0); //Terminar de editar una pelicula 
 
         do{
             cout << "Modificar otra pelicula (S/N): ";
             cin >> continuar;
             continuar = toupper(continuar);
-            if (continuar != 'S' || continuar != 'N') {
+            if (continuar != 'S' && continuar != 'N') { // CORREGIDO: usar && en lugar de ||
                 cout << "\nRespuesta no valida\n";
-                system("pause");
-                system("cls");
             }
-        }while(continuar != 'S' || continuar != 'N');
-
-        system("cls");
-    }while(continuar != 'N'); // Terminar de editar los campos de las peliculas 
+            c.limpiarPantalla();
+        }while(continuar != 'S' && continuar != 'N'); // CORREGIDO: usar && en lugar de ||
+        
+    }while(continuar == 'S'); // CORREGIDO: continuar mientras sea 'S'
 
     peliculas.close();
 }
@@ -354,15 +455,32 @@ int Administrador::elegirTitulos(char* tituloPeli) {
     // Abrir archivo para lectura 
     catalogo.open("catalogo.dat", ios::binary | ios::in);
 
+    if (!catalogo) {
+        cerr << "No se pudo abrir el catalogo\n";
+        return 0;
+    }
+
+    int totalPelis = c.getContador((char*)"Total");
+    if (totalPelis <= 0) {
+        cout << "No hay peliculas en el catalogo.\n";
+        catalogo.close();
+        return 0;
+    }
+
     do {
-        cout << "-----TITULOS-----";
-        while(catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula))) {
-            cout << "\n" << cont << "- " << p.getTitulo();
-            if (cont == c.getContador((char*)"Total")) break;
-            cont++;
+        cout << "\n-----TITULOS DISPONIBLES-----\n";
+        for (int i = 0; i < totalPelis; i++) {
+            catalogo.seekg(i * sizeof(Pelicula));
+            catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
+            if (p.getAnio() != 0) {
+                cout << cont << "- " << p.getTitulo() << "\n";
+                cont++;
+            }
         }
-        cout << "Numero de la pelicula a elegir: ";
+        
+        cout << "\nNumero de la pelicula a elegir: ";
         cin >> ind;
+        
         // Verificar entrada válida
 		if (cin.fail()){ // Si la entrada no es un numero
 			cin.clear(); // Limpiar estado de error de cin
@@ -372,7 +490,7 @@ int Administrador::elegirTitulos(char* tituloPeli) {
 		else if (fmod(ind,1)!=0) { // Descartar numeros con decimales
             cout << "\nOpcion invalida\n";
         }
-        else if(ind < 1 || ind > c.getContador((char*)"Total")) { // Si esta fuera de rango 
+        else if(ind < 1 || ind > totalPelis) { // Si esta fuera de rango 
             cout << "\nOpcion invalida\n";
         }
 		else { // Convertir entrada a enteros si es válida
@@ -380,12 +498,16 @@ int Administrador::elegirTitulos(char* tituloPeli) {
             indiceValido = true;
         }
 
-        system("pause");
-        system("cls");
-    }while (!indiceValido);
+        c.limpiarPantalla();
+    } while (!indiceValido);
+
+    // Copiar el nombre de la pelicula 
+    // Posicionarse dentro del archivo binario 
+    catalogo.seekg((indice - 1) * sizeof(Pelicula)); // CORREGIDO: paréntesis
+    catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
+    strcpy(tituloPeli, p.getTitulo());
 
     catalogo.close();
-
     return indice;
 }
 

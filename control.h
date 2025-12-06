@@ -9,6 +9,8 @@ using namespace std;
 
 #define TAM 500
 
+enum Accion {DECREMENTAR = 0, INCREMENTAR =  1};
+
 class Contadores {
     private:
         struct Contador{
@@ -53,8 +55,9 @@ class Contadores {
         Aumentar el total de peliculas y el total de un género específico
         @param total: es la palabra total para referise al total de películas
         @param genero: nombre del genero específico 
+        @param accion: si es 0, decrementa, si es 1, aumenta 
         */  
-        void setContadores(char* total, char* genero) {
+        void setContadores(char* total, char* genero, Accion accion) { 
             fstream contadores;
             
             // Abrir para escritura
@@ -77,7 +80,8 @@ class Contadores {
                     posicion = contadores.tellg() - streampos(sizeof(Contador));
 
                     // Actualizar contador
-                    cont.total++;
+                    if (accion == 1) cont.total++;
+                    else if (accion == 0 && cont.total > 0) cont.total--;
 
                     // Posicionarse y escribir los datos actulizados en el registro 
                     contadores.seekp(posicion);
@@ -87,14 +91,16 @@ class Contadores {
                 // Aumentar total de un genero específico 
                 else if (strcmp(cont.nom, genero) == 0) {
                     posicion = contadores.tellg() - streampos(sizeof(Contador));
-                    break;
 
                     // Actualizar contador
-                    cont.total++;
+                    if (accion == 1) cont.total++;
+                    else if (accion == 0 && cont.total > 0) cont.total--;
                 
                     // Posicionarse y escribir los datos actulizados en el registro 
                     contadores.seekp(posicion);
                     contadores.write(reinterpret_cast<char*>(&cont), sizeof(Contador));
+
+                    break;
                 }
             }
 
@@ -124,6 +130,7 @@ class Contadores {
             return -1;
         }
 };
+
 
 char Contadores::generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
 
