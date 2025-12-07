@@ -72,7 +72,9 @@ void Pelicula::cascaronBinario(char* archivo){
 
     if (!peliculas) {
         peliculas.close();
+        SetConsoleTextAttribute(hConsole, ROJO);
         cerr << "\nNo se pudo abrir el archivo de catalogo\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         return; 
     }
 
@@ -97,7 +99,9 @@ void Pelicula::setSinopsis(const char* tituloSinopsis){
 
     if(!sps) {
         sps.close();
+        SetConsoleTextAttribute(hConsole, ROJO);
         cerr << "No se pudo abrir el archivo para agregar sinopsis";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         return;
     }
     
@@ -119,7 +123,9 @@ void Pelicula::getSinopsis(char* tituloSinopsis){
 
     if(!sps) {
         sps.close();
+        SetConsoleTextAttribute(hConsole, ROJO);
         cerr << "No se pudo abrir el archivo para leer la sinopsis";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         return;
     }
 

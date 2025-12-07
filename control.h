@@ -48,7 +48,9 @@ class Control {
 
             if (!contadores) {
                 contadores.close();
+                SetConsoleTextAttribute(hConsole, ROJO);
                 cerr << "\nNo se pudo abrir el archivo de contadores\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
                 return; 
             }
 
@@ -83,7 +85,9 @@ class Control {
             contadores.open("contadores.dat", ios::binary | ios::out | ios::in);
 
             if(!contadores) {
-            cerr << "\nNo se puedo abrir el archivo de contadores\n";
+                SetConsoleTextAttribute(hConsole, ROJO);
+                cerr << "\nNo se puedo abrir el archivo de contadores\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
                 return;
             }
 
@@ -134,7 +138,9 @@ class Control {
             contadores.open("contadores.dat", ios::binary | ios::in);
 
             if(!contadores) {
+                SetConsoleTextAttribute(hConsole, ROJO);
                 cerr << "\nNo se puedo abrir el archivo de contadores\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
                 return INT_MAX;
             }
 
