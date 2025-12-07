@@ -1,15 +1,22 @@
 #ifndef PELICULAS_H
 #define PELICULAS_H
 
-#include<iostream>
-#include<string.h>
-#include<fstream>
-#include<sstream>
-#include<vector>
+#include <iostream>
+#include <string.h>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <cmath>
+#include <windows.h> // Para colores 
 #include "control.h"
 using namespace std;
 
 #define TOT_PELIS 1000
+const int anioMinimo = 1888; // La primer película se grabó en 1888, por lo tanto el año mínimo para una película debe ser 1888
+
+        //-----------NOMBRES DE LOS ARCHIVOS-----------
+        // char catalogo[13] = "catalogo.dat";
+        // char tempBin[9] = "temp.dat"; // Para cuando borren una pelicula 
 
 class Pelicula{
     private:
@@ -32,10 +39,6 @@ class Pelicula{
         void setSinopsis(const char* tituloSinopsis);
         void getSinopsis(char* tituloSinopsis);
 
-        //-----------NOMBRES DE LOS ARCHIVOS-----------
-        // char catalogo[13] = "catalogo.dat";
-        // char tempBin[9] = "temp.dat"; // Para cuando borren una pelicula 
-
         //-----------CASCARONES PARA LOS ARCHIVOS BINARIOS-----------
         void cascaronBinario(char* archivo);
 
@@ -46,11 +49,11 @@ class Pelicula{
         void setAnio(int a){ anio = a; }
         void setPuntuacion(float p){ puntuacion = p; }
 
-        char* getTitulo(){return titulo;}
-        char* getDirector(){return director;}
-        char* getGenero(){ return genero; }
-        int getAnio(){ return anio; }
-        float getPuntuacion(){ return puntuacion; }
+        const char* getTitulo() const {return titulo;}
+        const char* getDirector() const {return director;}
+        const char* getGenero() const { return genero; }
+        const int getAnio() const { return anio; }
+        const float getPuntuacion() const { return puntuacion; }
 
         void elegirGeneros(char* retonro);
 
@@ -58,7 +61,8 @@ class Pelicula{
 
         void generarPelMejoresVal(); // Generar archivo de peliculas mejor valoradas
 
-        const int anioMinimo = 1888; // La primer película se grabó en 1888, por lo tanto el año mínimo para una película debe ser 1888
+        
+
 };
 
 void Pelicula::cascaronBinario(char* archivo){
@@ -96,7 +100,8 @@ void Pelicula::setSinopsis(const char* tituloSinopsis){
         cerr << "No se pudo abrir el archivo para agregar sinopsis";
         return;
     }
-
+    
+    cin.ignore();
     cout << "Sinopsis de la pelicula " << tituloSinopsis << ": ";
     cin.getline(sinopsis,TAM);
 
@@ -134,6 +139,8 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
     float opc;
     int opcion; 
 
+    bool correcta = false;
+
     do {
         int i=1;
         cout << "-----GENEROS-----";
@@ -141,6 +148,7 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
         cout << "\n" << i << "-" << g; i++;
         } 
         cout << "\n8- Otro";
+        cout << "\nElige un genero: "; 
         cin >> opc;
         // Verificar entrada válida
 		if (cin.fail()){ // Si la entrada no es un numero
@@ -148,14 +156,19 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
 			cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
             opcion=500;
             cout << "\nOpcion invalida\n";
+            c.limpiarPantalla();
         }
 		else if (fmod(opc,1)!=0) { // Descartar numeros con decimales
             opcion=500; 
             cout << "\nOpcion invalida\n";
+            c.limpiarPantalla();
         }
-		else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
+		else {
+            opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
+            correcta = true;
+        }
 
-    } while(opcion != 0);
+    } while(!correcta);
 
     switch(opcion){
         case 1: strcpy(retorno, c.generos[0]); 
@@ -193,7 +206,6 @@ bool Pelicula::catalogoVacio() {
 
     if (!peliculas) {
         peliculas.close();
-        cerr << "No hay catalogo creado";
         return true;
     }
     peliculas.close();

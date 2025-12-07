@@ -5,13 +5,24 @@
 #include <fstream>
 #include <climits>
 #include <cstring>
+#include <windows.h>
 using namespace std;
 
 #define TAM 500
 
 enum Accion {DECREMENTAR = 0, INCREMENTAR =  1};
 
-class Contadores {
+/*
+Ejemplo de como poner colores 
+SetConsoleTextAttribute(hConsole, VERDE);
+*/
+
+// COLORES
+enum Colores{AZUL=1, VERDE, CIAN, ROJO, MAGENTA, AMARILLO, BLANCO};
+
+// Obtener manejador de consola
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); 
+class Control {
     private:
         struct Contador{
             int total;
@@ -20,7 +31,7 @@ class Contadores {
 
         Contador cont; 
     public:
-        Contadores() {
+        Control() {
             cont.total = 0;
             strcpy(cont.nom, " ");
         }
@@ -41,10 +52,18 @@ class Contadores {
                 return; 
             }
 
-            Contador vacio = {0, "vacio"};
+            Contador contador;
 
             for (int i = 0; i < 8; i++) {
-                contadores.write(reinterpret_cast<char*> (&vacio), sizeof(Contador));
+                if (i == 0) {
+                    contador.total = 0;
+                    strcpy(contador.nom,"Total");
+                }
+                else {
+                    contador.total = 0;
+                    strcpy(contador.nom, generos[i-1]);
+                }
+                contadores.write(reinterpret_cast<char*> (&contador), sizeof(Contador));
             }
 
         }
@@ -61,7 +80,7 @@ class Contadores {
             fstream contadores;
             
             // Abrir para escritura
-            contadores.open("contadores.dat", ios::binary | ios::out);
+            contadores.open("contadores.dat", ios::binary | ios::out | ios::in);
 
             if(!contadores) {
             cerr << "\nNo se puedo abrir el archivo de contadores\n";
@@ -132,6 +151,6 @@ class Contadores {
 };
 
 
-char Contadores::generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
+char Control::generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
 
 #endif
