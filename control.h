@@ -70,7 +70,7 @@ class Control {
 
         }
 
-        static char generos[7][TAM];
+        static char generos[8][TAM];
 
         /*
         Aumentar el total de peliculas y el total de un género específico
@@ -154,9 +154,16 @@ class Control {
             
             return -1;
         }
+
+        void dar_formato_a_cadenas(char* cadena) {
+            cadena[0] = toupper(cadena[0]);
+            for (size_t i = 1; i < sizeof(cadena); i++) {
+                cadena[i] = tolower(cadena[i]);
+            }
+        }
 };
 
 
-char Control::generos[7][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia"};
+char Control::generos[8][TAM] = {"Drama", "Accion", "Romance", "Comedia", "Ciencia ficcion", "Terror", "Fantasia", "Otro"};
 
 #endif

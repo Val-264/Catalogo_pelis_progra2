@@ -62,6 +62,7 @@ class Pelicula{
         const float getPuntuacion() const { return puntuacion; }
 
         void elegirGeneros(char* retonro);
+        int elegirTitulos(char* tituloPeli);
 
         bool catalogoVacio(); // Verificar si el catalogo está vacío 
 
@@ -182,7 +183,6 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
         for(auto& g: c.generos) {
         cout << "\n" << i << "-" << g; i++;
         } 
-        cout << "\n8- Otro";
         cout << "\nElige un genero: "; 
         cin >> opc;
         // Verificar entrada válida
@@ -206,31 +206,86 @@ void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administra
     } while(!correcta);
 
     switch(opcion){
-        case 1: strcpy(retorno, c.generos[0]); 
-                c.setContadores((char*)"Total", c.generos[0], INCREMENTAR);
-                break;
-        case 2: strcpy(retorno, c.generos[1]); 
-                c.setContadores((char*)"Total", c.generos[1], INCREMENTAR);
-                break;
-        case 3: strcpy(retorno, c.generos[2]); 
-                c.setContadores((char*)"Total", c.generos[2], INCREMENTAR);
-                break;
-        case 4: strcpy(retorno, c.generos[3]); 
-                c.setContadores((char*)"Total", c.generos[3], INCREMENTAR);
-                break;
-        case 5: strcpy(retorno, c.generos[4]); 
-                c.setContadores((char*)"Total", c.generos[4], INCREMENTAR);
-                break;
-        case 6: strcpy(retorno, c.generos[5]); 
-                c.setContadores((char*)"Total", c.generos[5], INCREMENTAR);
-                break;
-        case 7: strcpy(retorno, c.generos[6]); 
-                c.setContadores((char*)"Total", c.generos[6], INCREMENTAR);
-                break;
-        case 8: strcpy(retorno, "No disponible"); 
-                c.setContadores((char*)"Total", (char*)"Otros", INCREMENTAR);
-                break;
+        case 1: strcpy(retorno, c.generos[0]); break;
+        case 2: strcpy(retorno, c.generos[1]); break;
+        case 3: strcpy(retorno, c.generos[2]); break;
+        case 4: strcpy(retorno, c.generos[3]); break;
+        case 5: strcpy(retorno, c.generos[4]); break;
+        case 6: strcpy(retorno, c.generos[5]); break;
+        case 7: strcpy(retorno, c.generos[6]); break;
+        case 8: strcpy(retorno, c.generos[7]); break;
     }
+}
+
+int Pelicula::elegirTitulos(char* tituloPeli) {
+    fstream catalogo;
+    Pelicula p;
+    Control c;
+    float ind;
+    int indice = 0, cont = 1;
+    bool indiceValido = false;
+
+    // Abrir archivo para lectura 
+    catalogo.open("catalogo.dat", ios::binary | ios::in);
+
+    if (!catalogo) {
+        SetConsoleTextAttribute(hConsole, ROJO);
+        cerr << "No se pudo abrir el catalogo\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
+        return 0;
+    }
+
+    int totalPelis = c.getContador((char*)"Total");
+    if (totalPelis <= 0) {
+        cout << "No hay peliculas en el catalogo.\n";
+        catalogo.close();
+        return 0;
+    }
+
+    do {
+        SetConsoleTextAttribute(hConsole, AZUL);
+        cout << "\n-----TITULOS DISPONIBLES-----\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
+        for (int i = 0; i < totalPelis; i++) {
+            catalogo.seekg(i * sizeof(Pelicula));
+            catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
+            if (p.getAnio() != 0) {
+                cout << cont << "- " << p.getTitulo() << "\n";
+                cont++;
+            }
+        }
+        
+        cout << "\nNumero de la pelicula a elegir: ";
+        cin >> ind;
+        
+        // Verificar entrada válida
+		if (cin.fail()){ // Si la entrada no es un numero
+			cin.clear(); // Limpiar estado de error de cin
+			cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
+            cout << "\nOpcion invalida\n";
+        }
+		else if (fmod(ind,1)!=0) { // Descartar numeros con decimales
+            cout << "\nOpcion invalida\n";
+        }
+        else if(ind < 1 || ind > totalPelis) { // Si esta fuera de rango 
+            cout << "\nOpcion invalida\n";
+        }
+		else { // Convertir entrada a enteros si es válida
+            indice = static_cast<int>(ind);
+            indiceValido = true;
+        }
+
+        c.limpiarPantalla();
+    } while (!indiceValido);
+
+    // Copiar el nombre de la pelicula 
+    // Posicionarse dentro del archivo binario 
+    catalogo.seekg((indice - 1) * sizeof(Pelicula)); 
+    catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
+    strcpy(tituloPeli, p.getTitulo());
+
+    catalogo.close();
+    return indice;
 }
 
 bool Pelicula::catalogoVacio() {

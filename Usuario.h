@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-
 #include"peliculas.h"
 #include"control.h"
 using namespace std;
@@ -155,6 +154,7 @@ class Usuarios{
         
     void buscarPeliculas(){
         int opc1;
+        Pelicula p;
         c.limpiarPantalla();
  
         do{
@@ -169,32 +169,55 @@ class Usuarios{
             c.limpiarPantalla();
         
             switch (opc1)   {
-                case 1: char generoBuscado[TAM];
-                    cout << "\n Ingresa el genero a buscar: ";
-                    cin.ignore();
-                    cin.getline(generoBuscado, TAM);
-        
-                break;
-                case 2: char tituloBuscado[TAM];
-                    cout << "\n Ingresa el titulo a buscar: ";
-                    cin.ignore();
-                    cin.getline(tituloBuscado, TAM);
-                break;
-                case 3: int anioBuscado;
-                    cout << "\n Ingresa el anio a buscar: ";
-                    cin >> anioBuscado; 
-                break;
-                    default:
-                break;
+                case 1: {
+                        char generoBuscado[TAM];
+                        cout << "Genero buscado: ";
+                        cin.ignore();
+                        cin.getline(generoBuscado,TAM);
+                        c.dar_formato_a_cadenas(generoBuscado);
+                        buscarPorGenero(generoBuscado);
+                        break;
+                        }
+                case 2: {
+                        char tituloBuscado[TAM];
+                        cout <<"Titulo buscado: ";
+                        cin.ignore();
+                        cin.getline(tituloBuscado,TAM);
+                        c.dar_formato_a_cadenas(tituloBuscado);
+                        buscarPorTitulo(tituloBuscado);
+                        break;
+                        }
+                case 3: {
+                        float anio;
+                        int anioBuscado;
+                        do {
+                            cout << "\n Ingresa el anio a buscar: ";
+                            cin >> anio; 
+                            // Verificar entrada válida
+		                    if(cin.fail()){ // Si la entrada no es un numero
+		                        cin.clear(); // Limpiar estado de error de cin
+		                        cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
+                                anioBuscado=500;
+                            }
+		                    else if(fmod(anio,1)!=0) anioBuscado=500; // Descartar numeros con decimales
+		                    else anioBuscado=static_cast<int>(anio); // Convertir entrada a enteros si es válida
+                            if (anioBuscado < 1888) {
+                                cout << "\nAnio no valido\n";
+                                c.limpiarPantalla();
+                            }
+                        } while(anioBuscado < 1888);
+                        buscarPorAnio(anioBuscado);
+                        break;
+                        }   
+                    default: cout<< "\nOpcion invalida\n";
+                            break;
             }        
         }while (opc1 !=0); 
     }
 
     //Funciones para las opciones de buscar del menu
-    void buscarPorGenero(){
-        char generoBuscado[TAM];
+    void buscarPorGenero(char* generoBuscado){
         bool encontrado = false;
-
 
         ifstream archivo("catalogo.dat", ios::binary);
         if (!archivo.is_open()) {
@@ -220,8 +243,7 @@ class Usuarios{
         archivo.close();        
     }
     
-    void buscarPorTitulo(){
-        char tituloBuscado[TAM];
+    void buscarPorTitulo(char* tituloBuscado){
         bool encontrado = false;
 
         ifstream archivo("catalogo.dat", ios::binary);
@@ -250,11 +272,9 @@ class Usuarios{
          
     }
 
-    void buscarPorAnio(){
-        int anioBuscado;
+    void buscarPorAnio(int anioBuscado){
         bool encontrado = false;
 
- 
         ifstream archivo("catalogo.dat", ios::binary);
         if (!archivo.is_open()) {
             cout << "No se pudo abrir el archivo.\n";

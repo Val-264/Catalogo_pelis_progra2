@@ -21,7 +21,6 @@ class Administrador{
         void agregarPelicula();     // Agregar una pelicula al catalogo
         void modificarCatalogo();  // Muestra un menu para elegir modificar o eleminar una pelicula del catálogo
         void modificarPelicula();  // Modificar datos de alguna pelicula
-        int elegirTitulos(char* tituloPeli);
         void eliminarPelicula();    // Eliminar pelicula
         void ordenarPelicula();     // Ordena peliculas por año o por orden alfabético  
         void ordenar_anio_ascendente(Pelicula* pelis, int totPelis);
@@ -211,6 +210,8 @@ void Administrador::agregarPelicula(){
     peliculas.write(reinterpret_cast<char*>(&nuevo), sizeof(Pelicula));
     
     peliculas.close();
+
+    c.setContadores((char*)"Total", genero, INCREMENTAR);
     
     c.limpiarPantalla();
 }
@@ -238,7 +239,7 @@ void Administrador::modificarPelicula() {
 
     do {
         // Elegir película a modificar
-        indice = elegirTitulos(titulo);
+        indice = p.elegirTitulos(titulo);
         
         if (indice <= 0) {
             cout << "No se selecciono pelicula.\n";
@@ -270,7 +271,6 @@ void Administrador::modificarPelicula() {
                 opcion=500;
             }
 		    else if(fmod(opc,1)!=0) opcion=500; // Descartar numeros con decimales
-            else if(opc < 0 || opc > 4) opcion = 500; // Fuera de rango 
 		    else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
 
             // Capturar los cambios 
@@ -353,84 +353,14 @@ void Administrador::modificarPelicula() {
     peliculas.close();
 }
 
-int Administrador::elegirTitulos(char* tituloPeli) {
-    fstream catalogo;
-    Pelicula p;
-    Control c;
-    float ind;
-    int indice = 0, cont = 1;
-    bool indiceValido = false;
-
-    // Abrir archivo para lectura 
-    catalogo.open("catalogo.dat", ios::binary | ios::in);
-
-    if (!catalogo) {
-        SetConsoleTextAttribute(hConsole, ROJO);
-        cerr << "No se pudo abrir el catalogo\n";
-        SetConsoleTextAttribute(hConsole, BLANCO);
-        return 0;
-    }
-
-    int totalPelis = c.getContador((char*)"Total");
-    if (totalPelis <= 0) {
-        cout << "No hay peliculas en el catalogo.\n";
-        catalogo.close();
-        return 0;
-    }
-
-    do {
-        SetConsoleTextAttribute(hConsole, AZUL);
-        cout << "\n-----TITULOS DISPONIBLES-----\n";
-        SetConsoleTextAttribute(hConsole, BLANCO);
-        for (int i = 0; i < totalPelis; i++) {
-            catalogo.seekg(i * sizeof(Pelicula));
-            catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
-            if (p.getAnio() != 0) {
-                cout << cont << "- " << p.getTitulo() << "\n";
-                cont++;
-            }
-        }
-        
-        cout << "\nNumero de la pelicula a elegir: ";
-        cin >> ind;
-        
-        // Verificar entrada válida
-		if (cin.fail()){ // Si la entrada no es un numero
-			cin.clear(); // Limpiar estado de error de cin
-			cin.ignore(1000,'\n'); // Descartar la entrada incorrecta hasta mil caracteres o hasta encontrar un salto de linea
-            cout << "\nOpcion invalida\n";
-        }
-		else if (fmod(ind,1)!=0) { // Descartar numeros con decimales
-            cout << "\nOpcion invalida\n";
-        }
-        else if(ind < 1 || ind > totalPelis) { // Si esta fuera de rango 
-            cout << "\nOpcion invalida\n";
-        }
-		else { // Convertir entrada a enteros si es válida
-            indice = static_cast<int>(ind);
-            indiceValido = true;
-        }
-
-        c.limpiarPantalla();
-    } while (!indiceValido);
-
-    // Copiar el nombre de la pelicula 
-    // Posicionarse dentro del archivo binario 
-    catalogo.seekg((indice - 1) * sizeof(Pelicula)); 
-    catalogo.read(reinterpret_cast<char*>(&p), sizeof(Pelicula));
-    strcpy(tituloPeli, p.getTitulo());
-
-    catalogo.close();
-    return indice;
-}
-
 void Administrador::eliminarPelicula() {
     char titPeli[TAM];
     Control c;
+    Pelicula p;
     
     // Elegir título (solo una vez)
     cout << "Elige el titulo de la pelicula a eliminar:\n";
-    int indice = elegirTitulos(titPeli);
+    int indice = p.elegirTitulos(titPeli);
     
     if (indice <= 0) {
         cout << "No se selecciono ninguna pelicula.\n";
@@ -439,8 +369,7 @@ void Administrador::eliminarPelicula() {
     }
     
     fstream catalogo;
-    fstream temporal;
-    Pelicula p; 
+    fstream temporal; 
     
     // Crear archivo temporal 
     p.cascaronBinario((char*)"temp.dat");
