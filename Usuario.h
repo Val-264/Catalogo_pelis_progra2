@@ -8,7 +8,10 @@
 #include <algorithm>
 
 #include"peliculas.h"
+#include"control.h"
 using namespace std;
+
+
 
 class Usuarios{
     private: 
@@ -20,6 +23,12 @@ class Usuarios{
         string resenas[TAM*2];
         int anio;
         float puntuacion;
+
+        struct Resena{
+            char titulo[100];
+            char resena[500];
+            int aprobada; // 0 = no aprobada, 1 = aprobada
+        };
         
     public:
 
@@ -35,6 +44,8 @@ class Usuarios{
             cout << "6. Salir\n";
             cout << "   Selecciona una opcion...    \n";
             cin>>opc;
+
+            
 
             switch (opc){
             case 1: verCatalogoCom();
@@ -263,12 +274,24 @@ class Usuarios{
     }
 
     void setResenas(){
-        char tituloResena[TAM];
-        bool encontrado = false;
+        Resena r;
+        r.aprobada = 0; // Inicia no aprobada
+        fstream file("resenas.dat", ios::binary | ios::out | ios::app);
+        if (!file.is_open()) {
+            cout << "No se pudo abrir el archivo de reseñas.\n";
+            return;
+        }
 
-        cout << "\n Ingresa el titulo de la pelicula para agregar una resena: ";
+        cout << "\n Ingresa el titulo de la pelicula para la resena: ";
         cin.ignore();
-        cin.getline(tituloResena, TAM);
+        cin.getline(r.titulo, 100);
+        cout << "Escribe la resena: ";
+        cin.getline(r.resena, 500);
+
+        file.write(reinterpret_cast<char*>(&r), sizeof(Resena));
+        file.close();
+
+        cout << "\n Resena enviada y pendiente de aprobacion.\n"; 
     }
 
     void calificar(){
