@@ -31,6 +31,7 @@ class Usuarios{
         };
         
     public:
+        Control c;
 
     void menuUsuAaio(){
         int opc;
@@ -45,7 +46,7 @@ class Usuarios{
             cout << "   Selecciona una opcion...    \n";
             cin>>opc;
 
-            
+            c.limpiarPantalla();
 
             switch (opc){
             case 1: verCatalogoCom();
@@ -67,6 +68,7 @@ class Usuarios{
 
     //Funciones del usuario
     void verCatalogoCom(){
+        c.limpiarPantalla();
         ifstream archivo("catalogo.dat", ios::binary);
         string linea;
         Pelicula p;
@@ -93,6 +95,7 @@ class Usuarios{
 //Funcion para mostrar las peliculas mejor valoradas
     
     void PelMejoresVal(){
+        c.limpiarPantalla();
         Pelicula p;
         ifstream archivo("catalogo.dat", ios::binary );
         
@@ -152,6 +155,7 @@ class Usuarios{
         
     void buscarPeliculas(){
         int opc1;
+        c.limpiarPantalla();
  
         do{
             cout << " MENU DE BUSQUEDA \n";
@@ -161,6 +165,8 @@ class Usuarios{
             cout << " 3. Buscar por anio\n ";
             cout << " Selecciona tu opcion... ";
             cin >> opc1;
+
+            c.limpiarPantalla();
         
             switch (opc1)   {
                 case 1: char generoBuscado[TAM];
@@ -274,6 +280,7 @@ class Usuarios{
     }
 
     void setResenas(){
+        c.limpiarPantalla();
         Resena r;
         r.aprobada = 0; // Inicia no aprobada
         fstream file("resenas.dat", ios::binary | ios::out | ios::app);
@@ -295,6 +302,7 @@ class Usuarios{
     }
 
     void calificar(){
+        c.limpiarPantalla();
         char tituloCalificar[TAM];
         bool encontrado = false;
         float nuevaCalif;

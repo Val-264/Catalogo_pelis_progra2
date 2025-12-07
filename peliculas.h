@@ -35,12 +35,18 @@ class Pelicula{
             anio=aa;
             puntuacion = punt;
         }
+        struct Resena {
+            char titulo[100];
+            char resena[500];
+            int aprobada; // 0=no aprobada, 1=aprobada
+        };
 
         void setSinopsis(const char* tituloSinopsis);
         void getSinopsis(char* tituloSinopsis);
 
         //-----------CASCARONES PARA LOS ARCHIVOS BINARIOS-----------
         void cascaronBinario(char* archivo);
+        void cascaronResenas(char* archivoResenas);
 
         //-----------FUNCIONES-----------
         void setTitulo(char *t){ strcpy(titulo, t); }
@@ -85,6 +91,29 @@ void Pelicula::cascaronBinario(char* archivo){
     }
 
     peliculas.close();
+}
+
+void Pelicula::cascaronResenas(char* archivoResenas){
+    fstream resenas;
+
+    resenas.open(archivoResenas, ios::binary | ios::out | ios::trunc);
+
+    if (!resenas) {
+        resenas.close();
+        cerr << "\nNo se pudo abrir el archivo de reseñas\n";
+        return; 
+    }
+
+    Resena rVacia;
+    rVacia.aprobada = 0;
+    strcpy(rVacia.titulo, " ");
+    strcpy(rVacia.resena, " ");
+
+    for (int i = 0; i < TOT_PELIS; i++) {
+        resenas.write(reinterpret_cast<char*> (&rVacia), sizeof(Resena));
+    }
+
+    resenas.close();
 }
 
 void Pelicula::setSinopsis(const char* tituloSinopsis){
