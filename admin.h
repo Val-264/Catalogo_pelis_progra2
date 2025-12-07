@@ -38,7 +38,7 @@ class Administrador{
 void Administrador::mostrarMenu(){
     float opc;
     int opcion;
-    Contadores c;
+    Control c;
     do{
         cout << "\n------ACCIONES DEL ADMINISTRADOR-----:";
         cout << "\n0- Salir";
@@ -77,7 +77,7 @@ void Administrador::crearNuevoCatalogo(){
     // Verificar que no haya un catalogo exitente 
     // Elegir entre conservar el catalogo actual (si ya existía uno) o crear uno nuevo 
     Pelicula p;
-    Contadores c;
+    Control c;
     char opc;
 
     if (!p.catalogoVacio()) {
@@ -106,7 +106,7 @@ void Administrador::crearNuevoCatalogo(){
 }
 
 void Administrador::modificarCatalogo(){
-    Contadores c;
+    Control c;
     Pelicula p;
 
     if (p.catalogoVacio()) {
@@ -175,7 +175,7 @@ void Administrador::agregarPelicula(){
     punt = 0;
 
     Pelicula nuevo(titulo, dir, genero, aa, punt);
-    Contadores c;
+    Control c;
 
     // Agregar sinopsis
     p.setSinopsis(titulo);
@@ -207,7 +207,7 @@ void Administrador::agregarPelicula(){
 void Administrador::modificarPelicula() {
     fstream peliculas;
     Pelicula p;
-    Contadores c;
+    Control c;
 
     peliculas.open("catalogo.dat", ios::binary | ios::in | ios::out);
 
@@ -331,7 +331,7 @@ void Administrador::modificarPelicula() {
 int Administrador::elegirTitulos(char* tituloPeli) {
     fstream catalogo;
     Pelicula p;
-    Contadores c;
+    Control c;
     float ind;
     int indice = 0, cont = 1;
     bool indiceValido = false;
@@ -397,7 +397,7 @@ int Administrador::elegirTitulos(char* tituloPeli) {
 
 void Administrador::eliminarPelicula() {
     char titPeli[TAM];
-    Contadores c;
+    Control c;
     
     // Elegir título (solo una vez)
     cout << "Elige el titulo de la pelicula a eliminar:\n";
@@ -479,7 +479,7 @@ void Administrador::eliminarPelicula() {
 }
 
 void Administrador::ordenarPelicula() {
-    Contadores c;
+    Control c;
 
     int totPelis = c.getContador((char*)"Total");
     if (totPelis < 2) {
@@ -611,7 +611,7 @@ void Administrador::ordenar_alfabetico_descendente(Pelicula* pelis, int totPelis
 }
 
 void Administrador::aprobarResenias() { 
-    Contadores c;
+    Control c;
     cout << "\nLa funcion aprobar resenias no ha sido implementada\n";
     c.limpiarPantalla();
 }
@@ -619,7 +619,7 @@ void Administrador::aprobarResenias() {
 //-----------FUNCIONES PARA REVISAR EL CATALOGO-----------
 void Administrador::revisarCatalogo(){
     Pelicula p;
-    Contadores c;
+    Control c;
 
     if (p.catalogoVacio()) {
         cout << "No se ha creado un catalogo para revisar\n";

@@ -134,7 +134,7 @@ void Pelicula::getSinopsis(char* tituloSinopsis){
 }
 
 void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administrador, si llamada = 1es del usuario
-    Contadores c;
+    Control c;
 
     float opc;
     int opcion; 
