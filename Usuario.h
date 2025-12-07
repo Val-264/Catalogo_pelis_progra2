@@ -1,3 +1,6 @@
+#ifndef ADMIN_H
+#define ADMIN_H
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -33,17 +36,24 @@ class Usuarios{
             cout << "   Selecciona una opcion...    \n";
             cin>>opc;
 
-            switch (opc)
-            {
-            case 1: 
-                break;
-            
+            switch (opc){
+            case 1: verCatalogoCom();
+                    break;
+            case 2: PelMejoresVal();
+                    break;
+            case 3: setResenas();
+                    break;
+            case 4: calificar();
+                    break;
+            case 5: buscarPeliculas();
+                    break;                 
             default:
                 break;
             }
         } while (opc!=6);
         
     }
+
     //Funciones del usuario
     void verCatalogoCom(){
         ifstream archivo("catalogo.dat", ios::binary);
@@ -69,10 +79,7 @@ class Usuarios{
         archivo.close();
     }
         
-
-
 //Funcion para mostrar las peliculas mejor valoradas
-
     
     void PelMejoresVal(){
         Pelicula p;
@@ -130,11 +137,8 @@ class Usuarios{
             cout << "Puntuacion: " << pel.second << "\n";
         }
         cout << "-----------------------------\n";
-}
+    }
         
-
-    };
-
     void buscarPeliculas(){
         int opc1;
  
@@ -149,20 +153,17 @@ class Usuarios{
         
             switch (opc1)   {
                 case 1: char generoBuscado[TAM];
-                    bool encontrado = false;
                     cout << "\n Ingresa el genero a buscar: ";
                     cin.ignore();
                     cin.getline(generoBuscado, TAM);
         
                 break;
                 case 2: char tituloBuscado[TAM];
-                    bool encontrado = false;
                     cout << "\n Ingresa el titulo a buscar: ";
                     cin.ignore();
                     cin.getline(tituloBuscado, TAM);
                 break;
                 case 3: int anioBuscado;
-                    bool encontrado = false;
                     cout << "\n Ingresa el anio a buscar: ";
                     cin >> anioBuscado; 
                 break;
@@ -171,6 +172,7 @@ class Usuarios{
             }        
         }while (opc1 !=0); 
     }
+
     //Funciones para las opciones de buscar del menu
     void buscarPorGenero(){
         char generoBuscado[TAM];
@@ -198,9 +200,7 @@ class Usuarios{
         if (!encontrado){
             cout << "\nNo se encontraron peliculas con ese genero.\n";
         }
-
-    archivo.close();
-        
+        archivo.close();        
     }
     
     void buscarPorTitulo(){
@@ -272,44 +272,52 @@ class Usuarios{
     }
 
     void calificar(){
-    char tituloCalificar[TAM];
-    bool encontrado = false;
-    float nuevaCalif;
+        char tituloCalificar[TAM];
+        bool encontrado = false;
+        float nuevaCalif;
 
-    cout << "\n Ingresa el titulo de la pelicula: ";
-    cin.ignore();
-    cin.getline(tituloCalificar, TAM);
+        cout << "\n Ingresa el titulo de la pelicula: ";
+        cin.ignore();
+        cin.getline(tituloCalificar, TAM);
 
-    cout << "Ingresa tu calificacion (0 a 10): ";
-    cin >> nuevaCalif;
+        cout << "Ingresa tu calificacion (0 a 10): ";
+        cin >> nuevaCalif;
 
-    fstream archivo("catalogo.dat", ios::binary | ios::in | ios::out);
-    if (!archivo.is_open()) {
-        cout << "Error al abrir archivo.\n";
-        return;
-    }
-
-    Pelicula p;
-    while (archivo.read((char*)&p, sizeof(Pelicula))) {
-        if (strcmp(p.getTitulo(), tituloCalificar) == 0) {
-            encontrado = true;
-
-            float prom = (p.getPuntuacion() + nuevaCalif) / 2;
-            p.setPuntuacion(prom);
-
-            archivo.seekp(-sizeof(Pelicula), ios::cur);
-            archivo.write((char*)&p, sizeof(Pelicula));
-
-            cout << "\nCalificacion guardada.\n";
-            break;
+        fstream archivo("catalogo.dat", ios::binary | ios::in | ios::out);
+        if (!archivo.is_open()) {
+            cout << "Error al abrir archivo.\n";
+            return;
         }
+
+        Pelicula p;
+        while (archivo.read((char*)&p, sizeof(Pelicula))) {
+            if (strcmp(p.getTitulo(), tituloCalificar) == 0) {
+                encontrado = true;
+
+                float prom = (p.getPuntuacion() + nuevaCalif) / 2;
+                p.setPuntuacion(prom);
+
+                archivo.seekp(-sizeof(Pelicula), ios::cur);
+                archivo.write((char*)&p, sizeof(Pelicula));
+
+                cout << "\nCalificacion guardada.\n";
+                break;
+            }
+        }
+
+        if (!encontrado)
+            cout << "\nNo se encontro la pelicula.\n";
+
+        archivo.close();
     }
-
-    if (!encontrado)
-        cout << "\nNo se encontro la pelicula.\n";
-
-    archivo.close();
-}
  
+};
 
 
+
+
+
+
+
+
+#endif
