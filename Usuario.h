@@ -1,13 +1,12 @@
-#ifndef ADMIN_H
-#define ADMIN_H
+#ifndef USUARIO_H
+#define USUARIO_H
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm>
-#include"peliculas.h"
-#include"control.h"
+#include "peliculas.h"
 using namespace std;
 
 

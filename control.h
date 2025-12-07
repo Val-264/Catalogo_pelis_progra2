@@ -1,5 +1,5 @@
-#ifndef CONTADOR_H
-#define CONTADOR_H
+#ifndef CONTROL_H
+#define CONTROL_H
 
 #include <iostream>
 #include <fstream>
