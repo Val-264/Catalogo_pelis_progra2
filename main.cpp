@@ -15,7 +15,7 @@ int main(int argc, const char* argv[]){
     if(argc!=2 || (strcmp(argv[1],claveAdmin)!=0 && strcmp(argv[1],claveUsuario)!=0)) cout << "Clave incorrecta";
     // Mostrar menú de usuario o administrador dependiendo de la clave ingresada
     else if(strcmp(argv[1],claveAdmin)==0) admin.mostrarMenu();
-    else u.menuUsuAaio();
+    else u.menuUsuario();
 
     return 0;
 }

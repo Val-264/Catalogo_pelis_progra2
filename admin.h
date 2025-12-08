@@ -7,6 +7,7 @@
 #include <windows.h> // Para colores 
 #include <algorithm>
 #include "peliculas.h"
+#include "usuario.h"
 using namespace std;
 
 
@@ -15,9 +16,9 @@ class Administrador{
         // Control getControlador(){return c;}
         void mostrarMenu();         // Mostrar menu de acciones del administrador
 
-        
         //-----------FUNCIONES PARA MODIFICAR EL CATALOGO-----------
         void crearNuevoCatalogo(); // Crea un nuevo catalogo 
+        void removerSinopsis();
         void agregarPelicula();     // Agregar una pelicula al catalogo
         void modificarCatalogo();  // Muestra un menu para elegir modificar o eleminar una pelicula del catálogo
         void modificarPelicula();  // Modificar datos de alguna pelicula
@@ -39,8 +40,8 @@ void Administrador::mostrarMenu(){
     int opcion;
     Control c;
     do{
-        SetConsoleTextAttribute(hConsole, AZUL);
-        cout << "\n------ACCIONES DEL ADMINISTRADOR-----:";
+        SetConsoleTextAttribute(hConsole, CIAN);
+        cout << "\n------ACCIONES DEL ADMINISTRADOR------:";
         SetConsoleTextAttribute(hConsole, BLANCO);
         cout << "\n0- Salir";
         cout << "\n1- Crear nuevo catalogo";
@@ -66,10 +67,12 @@ void Administrador::mostrarMenu(){
             case 0: cout<<"Saliendo..."; break;
             default: 
                     SetConsoleTextAttribute(hConsole, ROJO);
-                    cout<<"Opcion invalida\n";
+                    cout<<"\nOpcion invalida\n";
                     SetConsoleTextAttribute(hConsole, BLANCO);
                     c.limpiarPantalla();
         }
+
+        system("cls");
 
     }while(opcion!=0);
 }
@@ -83,7 +86,7 @@ void Administrador::crearNuevoCatalogo(){
     Control c;
     char opc;
 
-    if (!p.catalogoVacio()) {
+    if (!p.catalogoExistente()) {
         do{
             cout << "Ya hay un catalogo existente, deseas conservarlo?(S/N): ";
             cin >> opc;
@@ -95,25 +98,53 @@ void Administrador::crearNuevoCatalogo(){
             return;
         }
         else {
+            // Remover sinopsis 
+            removerSinopsis();
+
+            // Limpiar cascaron 
             p.cascaronBinario((char*)"catalogo.dat");
             c.cascaronContadores();
-            cout << "\nSe creo el catalogo exitosamente\n";
+            SetConsoleTextAttribute(hConsole, VERDE);
+            cout << "\nSe creo el nuevo catalogo exitosamente\n";
+            SetConsoleTextAttribute(hConsole, BLANCO);
         }
     }
     else {
         p.cascaronBinario((char*)"catalogo.dat");
         c.cascaronContadores();
+        SetConsoleTextAttribute(hConsole, VERDE);
         cout << "\nSe creo el catalogo exitosamente\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
     }
     c.limpiarPantalla();
+}
+
+void Administrador::removerSinopsis() {
+    fstream sps;
+    fstream catalogo;
+    Pelicula pActual;
+    char titPeli[TAM];
+
+    catalogo.open("catalogo.dat", ios::binary | ios::in); // Abrir para lectura 
+    
+    while (catalogo.read(reinterpret_cast<char*>(&pActual), sizeof(Pelicula))) {
+        if (pActual.getAnio() == 0) break;
+        strcpy(titPeli,pActual.getTitulo());
+        strcat(titPeli,".txt");
+        remove(titPeli);
+    }
+
+    catalogo.close();
 }
 
 void Administrador::modificarCatalogo(){
     Control c;
     Pelicula p;
 
-    if (p.catalogoVacio()) {
-        cout << "No se ha creado un catalogo";
+    if (p.catalogoExistente()) {
+        SetConsoleTextAttribute(hConsole, ROJO);
+        cout << "No se ha creado un catalogo\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         c.limpiarPantalla();
         return;
     }
@@ -122,7 +153,7 @@ void Administrador::modificarCatalogo(){
     int opcion;
     do{
         int totPelis = c.getContador((char*)"Total");
-        SetConsoleTextAttribute(hConsole, AZUL);
+        SetConsoleTextAttribute(hConsole, CIAN);
         cout << "\n------MODIFICACION DE CATALOGO-----:";
         SetConsoleTextAttribute(hConsole, BLANCO);
         cout << "\n0- Salir";
@@ -167,23 +198,31 @@ void Administrador::agregarPelicula(){
     char titulo[TAM], dir[TAM], genero[TAM];
     int aa, punt;
     Pelicula p;
+    Control c;
 
     fstream peliculas;  
     
     cin.ignore();
     cout << "Titulo: "; cin.getline(titulo,TAM);
+    c.dar_formato_a_cadenas(titulo);
     cout << "Director: "; cin.getline(dir,TAM);
+    c.dar_formato_a_cadenas(dir);
     cout << "Genero:\n"; 
     p.elegirGeneros(genero);
     do{
         cout << "Anio: "; 
         cin >> aa;
-        if (aa < anioMinimo) cout << "Intenta de nuevo, en ese anio aun no se habian creado peliculas\n";
+        if (aa < anioMinimo) {
+            SetConsoleTextAttribute(hConsole, ROJO);
+            cout << "Intenta de nuevo, en ese anio aun no se habian creado peliculas\n";
+            SetConsoleTextAttribute(hConsole, BLANCO);
+            c.limpiarPantalla();
+
+        }
     }while(aa < anioMinimo);
     punt = 0;
 
     Pelicula nuevo(titulo, dir, genero, aa, punt);
-    Control c;
 
     // Agregar sinopsis
     p.setSinopsis(titulo);
@@ -212,11 +251,16 @@ void Administrador::agregarPelicula(){
     peliculas.close();
 
     c.setContadores((char*)"Total", genero, INCREMENTAR);
+
+    SetConsoleTextAttribute(hConsole, VERDE);
+    cout << "\nPelicula agregada exitosamente\n";
+    SetConsoleTextAttribute(hConsole, BLANCO);
     
     c.limpiarPantalla();
 }
 
 void Administrador::modificarPelicula() {
+    system("cls");
     fstream peliculas;
     Pelicula p;
     Control c;
@@ -239,6 +283,9 @@ void Administrador::modificarPelicula() {
 
     do {
         // Elegir película a modificar
+        SetConsoleTextAttribute(hConsole, CIAN);
+        cout << "Peliculas para modificar\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         indice = p.elegirTitulos(titulo);
         
         if (indice <= 0) {
@@ -253,7 +300,16 @@ void Administrador::modificarPelicula() {
 
         // Preguntar por el campo a modificar 
         do {
-            SetConsoleTextAttribute(hConsole, AZUL);
+            bool cambioValido = false;
+            SetConsoleTextAttribute(hConsole, MAGENTA);
+            cout << "\nDatos actuales de la pelicula\n";
+            SetConsoleTextAttribute(hConsole, BLANCO);
+            cout << "Titulo: " << p.getTitulo();
+            cout << "\nDirector: " << p.getDirector();
+            cout << "\nGenero: " << p.getGenero();
+            cout << "\nAnio: " << p.getAnio();
+            p.getSinopsis(p.getTitulo());
+            SetConsoleTextAttribute(hConsole, CIAN);
             cout << "\n------CAMPO A MODIFICAR-----:";
             SetConsoleTextAttribute(hConsole, BLANCO);
             cout << "\n0- Volver";
@@ -261,6 +317,7 @@ void Administrador::modificarPelicula() {
             cout << "\n2- Director";
             cout << "\n3- Genero";
             cout << "\n4- Anio";
+            cout << "\n5- Sinopsis";
             cout << "\nElige una opcion: ";
             cin >> opc;
 
@@ -271,28 +328,38 @@ void Administrador::modificarPelicula() {
                 opcion=500;
             }
 		    else if(fmod(opc,1)!=0) opcion=500; // Descartar numeros con decimales
-		    else opcion=static_cast<int>(opc); // Convertir entrada a enteros si es válida
-
+		    else { // Convertir entrada a enteros si es válida
+                opcion=static_cast<int>(opc); 
+                cambioValido = true;
+            }
+            
             // Capturar los cambios 
             switch (opcion) {
                 case 0: 
                     break;
-                case 1: 
+                case 1: {
+                    char tituloAnterior[TAM];
+                    strcpy(tituloAnterior,p.getTitulo());
+                    char tituloNuevo[TAM];
                     cout << "Nuevo Titulo: ";
                     cin.ignore();
                     cin.getline(ti, TAM);
-                    ti[0] = toupper(ti[0]);
-                    for (size_t i = 1; i < strlen(ti); i++) ti[i] = tolower(ti[i]);
+                    c.dar_formato_a_cadenas(ti);
+                    strcpy(tituloNuevo,ti);
                     // Grabar los cambios 
                     p.setTitulo(ti);
+                    // Renombrar al archivo de la sinopsis
+                    strcat(tituloAnterior,".txt");
+                    strcat(tituloNuevo,".txt");
+                    rename(tituloAnterior, tituloNuevo);
                     break;
+                    }
 
                 case 2: 
                     cout << "Nuevo Director: ";
                     cin.ignore();
                     cin.getline(dir, TAM);
-                    dir[0] = toupper(dir[0]);
-                    for (size_t i = 1; i < strlen(dir); i++) dir[i] = tolower(dir[i]);
+                    c.dar_formato_a_cadenas(dir);
                     // Grabar los cambios
                     p.setDirector(dir);
                     break;
@@ -316,6 +383,31 @@ void Administrador::modificarPelicula() {
                         // Grabar los cambios
                         p.setAnio(aa);
                         break;
+                
+                case 5: {
+                        fstream sps;
+                        char titSps[TAM];
+                        string nSps;
+                        strcpy(titSps, p.getTitulo());
+                        strcat(titSps,".txt");
+                        sps.open(titSps, ios::out | ios::trunc); // Abrir para escritura
+
+                        if (!sps) {
+                            SetConsoleTextAttribute(hConsole, ROJO);
+                            cout << "\nNo se pudo abrir el archivo para cambiar sinopsis\n";
+                            SetConsoleTextAttribute(hConsole, BLANCO);
+                            c.limpiarPantalla();
+                        }
+                        else {
+                            cout << "Nueva sinopsis: "; 
+                            cin.ignore();
+                            getline(cin,nSps);
+                            sps << nSps;
+                        
+                            sps.close();
+                        }
+                        }
+                        break;
 
                 default: 
                         SetConsoleTextAttribute(hConsole, ROJO);
@@ -325,19 +417,31 @@ void Administrador::modificarPelicula() {
             }
             
             // Escribir cambios si no es opción 0
-            if (opcion != 0) {
+            if (opcion != 0 && cambioValido) {
                 peliculas.seekp((indice - 1) * sizeof(Pelicula)); 
                 peliculas.write(reinterpret_cast<char*>(&p), sizeof(Pelicula));
                 SetConsoleTextAttribute(hConsole, VERDE);
                 cout << "Cambios guardados exitosamente.\n";
                 SetConsoleTextAttribute(hConsole, BLANCO);
             }
-            
+
             c.limpiarPantalla();
+            
         } while(opcion != 0); //Terminar de editar una pelicula 
+        system("cls");
+            
+        SetConsoleTextAttribute(hConsole, MAGENTA);
+        cout << "\nNuevos datos de la pelicula\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
+        cout << "Titulo: " << p.getTitulo();
+        cout << "\nDirector: " << p.getDirector();
+        cout << "\nGenero: " << p.getGenero();
+        cout << "\nAnio: " << p.getAnio();
+        p.getSinopsis(p.getTitulo());
+        cout << endl;
 
         do{
-            cout << "Modificar otra pelicula (S/N): ";
+            cout << "\nModificar otra pelicula (S/N): ";
             cin >> continuar;
             continuar = toupper(continuar);
             if (continuar != 'S' && continuar != 'N') { 
@@ -345,7 +449,7 @@ void Administrador::modificarPelicula() {
                 cout << "\nRespuesta no valida\n";
                 SetConsoleTextAttribute(hConsole, BLANCO);
             }
-            c.limpiarPantalla();
+            system("cls");
         }while(continuar != 'S' && continuar != 'N'); 
         
     }while(continuar == 'S'); 
@@ -354,6 +458,7 @@ void Administrador::modificarPelicula() {
 }
 
 void Administrador::eliminarPelicula() {
+    system("cls");
     char titPeli[TAM];
     Control c;
     Pelicula p;
@@ -410,8 +515,9 @@ void Administrador::eliminarPelicula() {
         if (strcmp(peliculaActual.getTitulo(), titPeli) == 0) {
             encontrada = true;
             strcpy(generoEliminado, peliculaActual.getGenero());
-            cout << "Pelicula: " << peliculaActual.getTitulo() << " eliminada\n";
-            strcat(titPeli,".txt");
+            SetConsoleTextAttribute(hConsole, VERDE);
+            cout << "Pelicula: " << peliculaActual.getTitulo() << " eliminada exitosamente\n";
+            strcat(titPeli,".txt"); // Remover archivo de la sinopsis
             remove(titPeli);
         }
         else { // Si no es la pelicula pasarla al temporal
@@ -433,22 +539,28 @@ void Administrador::eliminarPelicula() {
 
         remove("catalogo.dat"); // Borrar el catalogo anterior
         rename("temp.dat", "catalogo.dat"); // Renombrar el temporal como nuevo catalogo
-        cout << "\nPelicula eliminada exitosamente. Peliculas restantes: " << totPermanecen << endl;
+        cout << "Peliculas restantes: " << totPermanecen << endl;
+        SetConsoleTextAttribute(hConsole, BLANCO);
     } else {
         remove("temp.dat"); // Eliminar archivo temporal si no se encontró la película
+        SetConsoleTextAttribute(hConsole, ROJO);
         cout << "\nNo se encontro la pelicula: " << titPeli << endl;
+        SetConsoleTextAttribute(hConsole, BLANCO);
     }
 
     c.limpiarPantalla();
 }
 
 void Administrador::ordenarPelicula() {
+    system("cls");
     Control c;
 
     int totPelis = c.getContador((char*)"Total");
     if (totPelis < 2) {
-        cout << "Hay " << c.getContador((char*)"Total") << "peliculas.\n"
+        SetConsoleTextAttribute(hConsole, AMARILLO);
+        cout << "Hay " << c.getContador((char*)"Total") << " peliculas.\n"
             << "No necesitas ordenar\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         c.limpiarPantalla();
         return;
     }
@@ -475,14 +587,19 @@ void Administrador::ordenarPelicula() {
     }
     catalogo.close();  // Cerrar archivo después de leer
     
+    Pelicula p;
     do{
-        SetConsoleTextAttribute(hConsole, AZUL);
+        SetConsoleTextAttribute(hConsole, MAGENTA);
+        cout << "\nOrden actual de las peliculas:\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
+        p.verTitulos_anio();
+        SetConsoleTextAttribute(hConsole, CIAN);
         cout << "\n------ORDENAR PELICULAS-----:";
         SetConsoleTextAttribute(hConsole, BLANCO);
         cout << "\n0- Salir";
         cout << "\nPOR ANIO:";
-        cout << "\n1- De la más antigua a la más reciente (ascendente)";
-        cout << "\n2- De la más reciente a la más antigua (descendente)";
+        cout << "\n1- De la mas antigua a la mas reciente (ascendente)";
+        cout << "\n2- De la mas reciente a la mas antigua (descendente)";
         cout << "\nPOR ORDEN ALFABETICO"; 
         cout << "\n3- De la A a la Z"; 
         cout << "\n4- De la Z a la A";
@@ -501,11 +618,11 @@ void Administrador::ordenarPelicula() {
         switch (opcion){
             case 1: 
                 ordenar_anio_ascendente(pelis, totPelis); 
-                cout << "\nPeliculas ordenadas por año (ascendente)\n";
+                cout << "\nPeliculas ordenadas por anio (ascendente)\n";
                 break;
             case 2: 
                 ordenar_anio_descendente(pelis, totPelis); 
-                cout << "\nPeliculas ordenadas por año (descendente)\n";
+                cout << "\nPeliculas ordenadas por anio (descendente)\n";
                 break;
             case 3: 
                 ordenar_alfabetico_ascendente(pelis, totPelis); 
@@ -516,12 +633,14 @@ void Administrador::ordenarPelicula() {
                 cout << "\nPeliculas ordenadas alfabeticamente (Z-A)\n";
                 break;
             case 0: 
-                cout<<"Saliendo..."; 
+                cout << "Saliendo..."; 
+                system("cls");
                 break;
             default: 
                 SetConsoleTextAttribute(hConsole, ROJO);
                 cout<<"Opcion invalida\n";
                 SetConsoleTextAttribute(hConsole, BLANCO);
+                c.limpiarPantalla();
         }
 
         // Guardar cambios si se ordenó 
@@ -538,11 +657,12 @@ void Administrador::ordenarPelicula() {
                     catalogo.write(reinterpret_cast<char*>(&pelis[i]), sizeof(Pelicula));            
                 }
                 catalogo.close();  
+                SetConsoleTextAttribute(hConsole, VERDE);
                 cout << "Cambios guardados exitosamente.\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
+                c.limpiarPantalla();
             }
         }
-        revisarCatalogo();
-        
     } while(opcion != 0);
 
     delete[] pelis; // Liberar memoria
@@ -591,14 +711,18 @@ void Administrador::revisarCatalogo(){
     Pelicula p;
     Control c;
 
-    if (p.catalogoVacio()) {
+    if (p.catalogoExistente()) {
+        SetConsoleTextAttribute(hConsole, AMARILLO);
         cout << "No se ha creado un catalogo para revisar\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         c.limpiarPantalla();
         return;
     }
 
     if (c.getContador((char*)"Total") < 1) {
+        SetConsoleTextAttribute(hConsole, AMARILLO);
         cout << "No hay peliculas registradas para revisar\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         c.limpiarPantalla();
         return;
     }
@@ -617,7 +741,7 @@ void Administrador::revisarCatalogo(){
             return;
         }
         
-        SetConsoleTextAttribute(hConsole, AZUL);
+        SetConsoleTextAttribute(hConsole, CIAN);
         cout << "\nPeliculas existentes en el catalogo:\n";
         SetConsoleTextAttribute(hConsole, BLANCO);
         cout << "--------------------------------";
@@ -638,6 +762,7 @@ void Administrador::revisarCatalogo(){
             cout << "\nGenero: " << registro.getGenero();
             cout << "\nAnio: " << registro.getAnio();
             cout << "\nPuntuacion: "  << registro.getPuntuacion();
+            p.getSinopsis(registro.getTitulo());
             cout << "\n--------------------------------\n";
         }
         c.limpiarPantalla();

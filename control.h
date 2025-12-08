@@ -8,7 +8,9 @@
 #include <windows.h>
 using namespace std;
 
+#define TOT_PELIS 1000
 #define TAM 500
+const int anioMinimo = 1888; // La primer película se grabó en 1888, por lo tanto el año mínimo para una película debe ser 1888
 
 enum Accion {DECREMENTAR = 0, INCREMENTAR =  1};
 
@@ -91,7 +93,6 @@ class Control {
                 return;
             }
 
-            // Buscar si el usuario ya existe en el archivo 
             while (contadores.read(reinterpret_cast<char*>(&cont), sizeof(Contador))) {
                 int posicion = 0;
 
