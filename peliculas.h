@@ -15,6 +15,12 @@ using namespace std;
         // char catalogo[13] = "catalogo.dat";
         // char tempBin[9] = "temp.dat"; // Para cuando borren una pelicula 
 
+// Estructura para reseñas 
+struct Resena {
+    char titulo[100];
+    char resena[500];
+    int aprobada; // 0=no aprobada, 1=aprobada
+};
 class Pelicula{
     private:
         char titulo[TAM];
@@ -32,11 +38,7 @@ class Pelicula{
             anio=aa;
             puntuacion = punt;
         }
-        struct Resena {
-            char titulo[100];
-            char resena[500];
-            int aprobada; // 0=no aprobada, 1=aprobada
-        };
+
 
         void setSinopsis(const char* tituloSinopsis);
         void getSinopsis(const char* tituloSinopsis);
@@ -61,13 +63,12 @@ class Pelicula{
         void elegirGeneros(char* retonro);
         int elegirTitulos(char* tituloPeli);
         void verTitulos_anio();
+        void mostrarResena(const char* titPeli);
 
         bool catalogoVacio(); // Verificar si el catalogo está vacío 
         bool catalogoExistente(); // Verificar si se ha creado un catalogo
 
-        void generarPelMejoresVal(); // Generar archivo de peliculas mejor valoradas
-
-        
+        void generarPelMejoresVal(); // Generar archivo de peliculas mejor valoradas    
 
 };
 
@@ -348,10 +349,32 @@ bool Pelicula::catalogoExistente() {
 
     if (!peliculas) {
         peliculas.close();
-        return true;
+        return false;
     }
     peliculas.close();
-    return false;
+    return true;
+}
+
+/*
+Buscar y mostrar reseñas aprobadas de una pelicula 
+@param titPeli: titulo de la pelicula buscada 
+*/
+void Pelicula::mostrarResena(const char* titPeli) {
+    fstream resenias;
+    Resena r;
+    bool encontrada = false;
+    int cont = 1;
+    resenias.open("resenas.dat", ios::binary | ios::in); // Abrir para lectura 
+    while (resenias.read(reinterpret_cast<char*>(&r), sizeof(Resena))) {
+        if (strcmp (r.titulo, titPeli) == 0 && r.aprobada == 1) {
+            encontrada = true;
+            cout << "\n" << cont << "- " << r.resena;
+            cont ++;
+        }
+    }
+
+    if (!encontrada) cout << " actualmente sin resenias";
+    resenias.close();
 }
 
 #endif

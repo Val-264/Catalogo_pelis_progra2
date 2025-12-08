@@ -157,10 +157,43 @@ class Control {
         }
 
         void dar_formato_a_cadenas(char* cadena) {
+            normalizarEspacios(cadena);
             cadena[0] = toupper(cadena[0]);
-            for (size_t i = 1; i < sizeof(cadena); i++) {
-                cadena[i] = tolower(cadena[i]);
+            for (size_t i = 1; i < strlen(cadena); i++) {
+                if (cadena[i-1] == ' ') cadena[i] = toupper(cadena[i]);
+                else cadena[i] = tolower(cadena[i]);
             }
+        }
+
+        void normalizarEspacios(char* cadena) {
+            if (cadena == nullptr || strlen(cadena) == 0) return;
+    
+            int i = 0, j = 0;
+            bool espacioAnterior = false;
+    
+            // Eliminar espacios iniciales
+            while (cadena[i] == ' ' || cadena[i] == '\t') i++;
+    
+        // Procesar el resto
+        while (cadena[i]) {
+            if (cadena[i] == ' ' || cadena[i] == '\t') {
+                if (!espacioAnterior) {
+                    cadena[j++] = ' ';  // Convertir cualquier espacio/tab a un solo espacio
+                    espacioAnterior = true;
+                }
+        } else {
+            cadena[j++] = cadena[i];
+            espacioAnterior = false;
+        }
+        i++;
+    }
+    
+    // Eliminar espacio final si hay
+    if (j > 0 && cadena[j-1] == ' ') {
+        j--;
+    }
+    
+    cadena[j] = '\0';
         }
 };
 

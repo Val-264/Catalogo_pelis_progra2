@@ -107,12 +107,16 @@ class Usuarios{
         SetConsoleTextAttribute(hConsole, BLANCO);
 
         while (archivo.read((char*)&p, sizeof(Pelicula)))  {
+            if (p.getAnio() == 0) break;
             cout << "--------------------------------\n";
             cout << "Titulo: " << p.getTitulo() << "\n";
             cout << "Director: " << p.getDirector() << "\n";
             cout << "Genero: " << p.getGenero() << "\n";
             cout << "Anio: " << p.getAnio() << "\n";
             cout << "Puntuacion: " << p.getPuntuacion() << "\n";
+            p.getSinopsis(p.getTitulo());
+            cout << "\nResena: ";
+            p.mostrarResena(p.getTitulo());
             cout << "--------------------------------\n";
         }
 
@@ -290,16 +294,24 @@ class Usuarios{
         }
 
         Pelicula p;
+        int mostrarEncabezado = 0;
         while (archivo.read((char*)&p, sizeof(Pelicula))) {
             if (strcmp(p.getGenero(), generoBuscado) == 0) {
                 encontrado = true;
-                cout << "\n----- PELICULA ENCONTRADA -----\n";
+                mostrarEncabezado++;
+                if (mostrarEncabezado == 1) {
+                    SetConsoleTextAttribute(hConsole, VERDE);
+                    cout << "\n----- PELICULA ENCONTRADA -----\n";
+                    SetConsoleTextAttribute(hConsole, BLANCO);
+                }
                 cout << "Titulo: " << p.getTitulo() << "\n";
                 cout << "Director: " << p.getDirector() << "\n";
                 cout << "Anio: " << p.getAnio() << "\n";
-                cout << "Puntuacion: " << p.getPuntuacion() << "\n";
+                cout << "Puntuacion: " << p.getPuntuacion();
                 p.getSinopsis(p.getTitulo());
-                break;
+                cout << "\nResenia: ";
+                p.mostrarResena(p.getTitulo());
+                cout << "\n--------------------------------\n";
             }
         }
 
@@ -321,25 +333,33 @@ class Usuarios{
         }
 
         Pelicula p;
+        int mostrarEncabezado = 0;
         while (archivo.read((char*)&p, sizeof(Pelicula))) {
             if (strcmp(p.getTitulo(), tituloBuscado) == 0) {
                 encontrado = true;
-                cout << "\n----- PELICULA ENCONTRADA -----\n";
+                mostrarEncabezado++;
+                if (mostrarEncabezado == 1) {
+                    SetConsoleTextAttribute(hConsole, VERDE);
+                    cout << "\n----- PELICULA ENCONTRADA -----\n";
+                    SetConsoleTextAttribute(hConsole, BLANCO);
+                }
                 cout << "Titulo: " << p.getTitulo() << "\n";
                 cout << "Director: " << p.getDirector() << "\n";
                 cout << "Genero: " << p.getGenero() << "\n";
                 cout << "Anio: " << p.getAnio() << "\n";
-                cout << "Puntuacion: " << p.getPuntuacion() << "\n";
+                cout << "Puntuacion: " << p.getPuntuacion();
                 p.getSinopsis(p.getTitulo());
-                break;
+                cout << "\nResenia: ";
+                p.mostrarResena(p.getTitulo());
+                cout << "\n--------------------------------\n";
             }
         }
 
-        if (!encontrado)
+        if (!encontrado) {
             SetConsoleTextAttribute(hConsole, AMARILLO);
             cout << "\nNo se encontro la pelicula con ese titulo.\n";
             SetConsoleTextAttribute(hConsole, BLANCO);
-
+        }
         archivo.close();
          
     }
@@ -354,24 +374,32 @@ class Usuarios{
         }
 
         Pelicula p;
+        int mostrarEncabezado = 0;
         while (archivo.read((char*)&p, sizeof(Pelicula))) {
             if (p.getAnio() == anioBuscado) {
                 encontrado = true;
-                cout << "\n----- PELICULA ENCONTRADA -----\n";
+                mostrarEncabezado++;
+                if (mostrarEncabezado == 1) {
+                    SetConsoleTextAttribute(hConsole, VERDE);
+                    cout << "\n----- PELICULA ENCONTRADA -----\n";
+                    SetConsoleTextAttribute(hConsole, BLANCO);
+                }
                 cout << "Titulo: " << p.getTitulo() << "\n";
                 cout << "Director: " << p.getDirector() << "\n";
                 cout << "Genero: " << p.getGenero() << "\n";
-                cout << "Puntuacion: " << p.getPuntuacion() << "\n";
+                cout << "Puntuacion: " << p.getPuntuacion();
                 p.getSinopsis(p.getTitulo());
-                break;
+                cout << "\nResenia: ";
+                p.mostrarResena(p.getTitulo());
+                cout << "\n--------------------------------\n";
             }
         }
 
-        if (!encontrado)
+        if (!encontrado) {
             SetConsoleTextAttribute(hConsole, AMARILLO);
             cout << "\nNo se encontraron peliculas de ese anio.\n";
             SetConsoleTextAttribute(hConsole, BLANCO);
-
+        }
         archivo.close();
     }
 
@@ -481,7 +509,6 @@ class Usuarios{
 
         Pelicula peliculaActual;
         streampos posicionActual;
-        bool actualizado = false;
 
         // Buscar la película específica
         while (archivo.read((char*)&peliculaActual, sizeof(Pelicula))) {
@@ -517,11 +544,10 @@ class Usuarios{
                 else {
                     SetConsoleTextAttribute(hConsole, VERDE);
                     cout << "\nCalificacion guardada exitosamente!\n";
-                    cout << "  Puntuacion anterior: " << puntuacionActual << "\n";
-                    cout << "  Tu calificacion: " << nuevaCalif << "\n";
-                    cout << "  Nueva puntuacion promedio: " << nuevaPuntuacion << "\n";
+                    cout << "Puntuacion anterior: " << puntuacionActual << "\n";
+                    cout << "Tu calificacion: " << nuevaCalif << "\n";
+                    cout << "Nueva puntuacion promedio: " << nuevaPuntuacion << "\n";
                     SetConsoleTextAttribute(hConsole, BLANCO);
-                    actualizado = true;
                 }
                 break;
             }

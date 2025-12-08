@@ -7,7 +7,6 @@
 #include <windows.h> // Para colores 
 #include <algorithm>
 #include "peliculas.h"
-#include "usuario.h"
 using namespace std;
 
 
@@ -86,11 +85,17 @@ void Administrador::crearNuevoCatalogo(){
     Control c;
     char opc;
 
-    if (!p.catalogoExistente()) {
+    if (!p.catalogoVacio()) {
         do{
             cout << "Ya hay un catalogo existente, deseas conservarlo?(S/N): ";
             cin >> opc;
             opc = toupper(opc);
+            if (opc != 'S' && opc != 'N') {
+                SetConsoleTextAttribute(hConsole, ROJO);
+                cout << "\nOpcion invalida\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
+                c.limpiarPantalla();
+            }
         } while(opc != 'S' && opc != 'N'); 
 
         if (opc == 'S') {  
@@ -100,7 +105,8 @@ void Administrador::crearNuevoCatalogo(){
         else {
             // Remover sinopsis 
             removerSinopsis();
-
+            remove("resenas.dat");
+            remove("mejoresPel.dat");
             // Limpiar cascaron 
             p.cascaronBinario((char*)"catalogo.dat");
             c.cascaronContadores();
@@ -141,7 +147,7 @@ void Administrador::modificarCatalogo(){
     Control c;
     Pelicula p;
 
-    if (p.catalogoExistente()) {
+    if (!p.catalogoExistente()) {
         SetConsoleTextAttribute(hConsole, ROJO);
         cout << "No se ha creado un catalogo\n";
         SetConsoleTextAttribute(hConsole, BLANCO);
@@ -702,9 +708,141 @@ void Administrador::ordenar_alfabetico_descendente(Pelicula* pelis, int totPelis
 }
 
 void Administrador::aprobarResenias() { 
+    system("cls");
     Control c; 
+    Resena r;
+    char opc;
+
+    while (true) {  // Bucle principal para seguir aprobando
+        fstream resenias("resenas.dat", ios::binary | ios::in | ios::out);
+        if (!resenias) {
+            SetConsoleTextAttribute(hConsole, ROJO);
+            cout << "No se pudo abrir el archivo de resenias.\n";
+            SetConsoleTextAttribute(hConsole, BLANCO);
+            c.limpiarPantalla();
+            return;
+        }
+
+        SetConsoleTextAttribute(hConsole, CIAN);
+        cout << "\n------RESENIAS POR APROBAR-----\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
+        
+        bool hayPendientes = false;
+        streampos posicion;
+        
+        // Primera pasada: mostrar pendientes
+        while (resenias.read(reinterpret_cast<char*>(&r), sizeof(Resena))) {
+            if (r.aprobada == 0) {
+                hayPendientes = true;
+                cout << "\n-----------------------------------\n";
+                cout << "Titulo: " << r.titulo << "\n";
+                cout << "Resenia: " << r.resena << "\n";
+                cout << "-----------------------------------\n";
+            }
+        }
+
+        if (!hayPendientes) {
+            SetConsoleTextAttribute(hConsole, VERDE);
+            cout << "\nNo hay resenias pendientes por aprobar!\n";
+            SetConsoleTextAttribute(hConsole, BLANCO);
+            resenias.close();
+            c.limpiarPantalla();
+            return;
+        }
+
+        // Segunda pasada: procesar aprobaciones
+        resenias.clear();  // Limpiar flags de EOF
+        resenias.seekg(0, ios::beg);  // Volver al inicio
+        
+        char continuar = 'S';
+        while (continuar == 'S') {
+            cout << "\nIngresa el titulo de la resenia a aprobar: ";
+            cin.ignore();
+            char tituloBuscar[100];
+            cin.getline(tituloBuscar, 100);
+            c.dar_formato_a_cadenas(tituloBuscar);
+            
+            // Buscar la reseña específica
+            resenias.seekg(0, ios::beg);
+            bool encontrada = false;
+            
+            while (resenias.read(reinterpret_cast<char*>(&r), sizeof(Resena))) {
+                if (strcmp(r.titulo, tituloBuscar) == 0 && r.aprobada == 0) {
+                    encontrada = true;
+                    
+                    // Calcular posición 
+                    streampos posicionRegistro =  resenias.tellg()- streampos(sizeof(Resena));
+                    
+                    do {
+                        cout << "\nResenia encontrada:\n";
+                        cout << "Titulo: " << r.titulo << "\n";
+                        cout << "Resenia: " << r.resena << "\n";
+                        cout << "\nAprobar resenia? (S/N): ";
+                        cin >> opc;
+                        opc = toupper(opc);
+                        
+                        if (opc != 'S' && opc != 'N') {
+                            SetConsoleTextAttribute(hConsole, ROJO);
+                            cout << "Opcion invalida\n";
+                            SetConsoleTextAttribute(hConsole, BLANCO);
+                        }
+                    } while(opc != 'S' && opc != 'N');
+                    
+                    if (opc == 'S') {
+                        r.aprobada = 1;
+                        
+                        // Escribir en la posición correcta
+                        resenias.seekp(posicionRegistro);
+                        resenias.write(reinterpret_cast<char*>(&r), sizeof(Resena));
+                        
+                        SetConsoleTextAttribute(hConsole, VERDE);
+                        cout << "\nResenia aprobada exitosamente!\n";
+                        SetConsoleTextAttribute(hConsole, BLANCO);
+                    }
+                    break;
+                }
+            }
+            
+            if (!encontrada) {
+                SetConsoleTextAttribute(hConsole, AMARILLO);
+                cout << "\nNo se encontro una resenia pendiente con ese titulo.\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
+            }
+            
+            do {
+                cout << "\nAprobar otra resenia? (S/N): ";
+                cin >> continuar;
+                continuar = toupper(continuar);
+                
+                if (continuar != 'S' && continuar != 'N') {
+                    SetConsoleTextAttribute(hConsole, ROJO);
+                    cout << "Opcion invalida\n";
+                    SetConsoleTextAttribute(hConsole, BLANCO);
+                }
+            } while(continuar != 'S' && continuar != 'N');
+        }
+        
+        resenias.close();
+        
+        // Preguntar si quiere ver más pendientes
+        char verMas;
+        do {
+            cout << "\nVer resenias pendientes restantes? (S/N): ";
+            cin >> verMas;
+            verMas = toupper(verMas);
+            
+            if (verMas != 'S' && verMas != 'N') {
+                SetConsoleTextAttribute(hConsole, ROJO);
+                cout << "Opcion invalida\n";
+                SetConsoleTextAttribute(hConsole, BLANCO);
+            }
+        } while(verMas != 'S' && verMas != 'N');
+        
+        if (verMas == 'N') break;
+        
+        system("cls");
+    }
     
-    cout << "\nLa funcion aprobar resenias no ha sido implementada\n";
     c.limpiarPantalla();
 }
 
@@ -713,7 +851,7 @@ void Administrador::revisarCatalogo(){
     Pelicula p;
     Control c;
 
-    if (p.catalogoExistente()) {
+    if (!p.catalogoExistente()) {
         SetConsoleTextAttribute(hConsole, AMARILLO);
         cout << "No se ha creado un catalogo para revisar\n";
         SetConsoleTextAttribute(hConsole, BLANCO);
@@ -765,6 +903,8 @@ void Administrador::revisarCatalogo(){
             cout << "\nAnio: " << registro.getAnio();
             cout << "\nPuntuacion: "  << registro.getPuntuacion();
             p.getSinopsis(registro.getTitulo());
+            cout << "\nResenia:";
+            p.mostrarResena(registro.getTitulo());
             cout << "\n--------------------------------\n";
         }
         c.limpiarPantalla();
