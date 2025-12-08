@@ -354,23 +354,4 @@ bool Pelicula::catalogoExistente() {
     return false;
 }
 
-//Funcion para generar las peliculas mejor valoradas
-
-void Pelicula::generarPelMejoresVal(){
-    fstream catalogo, mejores;
-    catalogo.open("catalogo.dat", ios::binary | ios::in);
-    mejores.open("mejorValoradas.dat", ios::binary | ios::out | ios::trunc);
-    
-    Pelicula p;
-    if (!catalogo.is_open() || !mejores.is_open()) {
-        SetConsoleTextAttribute(hConsole, ROJO);
-        cout << "No se puede abrir uno de los archivos\n";
-        SetConsoleTextAttribute(hConsole, BLANCO);
-        return;
-    }
-
-    vector <Pelicula> peliculas;
-
-}     
-
 #endif

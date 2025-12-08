@@ -183,6 +183,7 @@ void Administrador::modificarCatalogo(){
             case 2: modificarPelicula(); break;
             case 3: eliminarPelicula(); break;
             case 4: ordenarPelicula(); break;
+            case 5: aprobarResenias(); break;
             case 0: cout<<"Saliendo..."; break;
             default: 
                     SetConsoleTextAttribute(hConsole, ROJO);
@@ -701,7 +702,8 @@ void Administrador::ordenar_alfabetico_descendente(Pelicula* pelis, int totPelis
 }
 
 void Administrador::aprobarResenias() { 
-    Control c;
+    Control c; 
+    
     cout << "\nLa funcion aprobar resenias no ha sido implementada\n";
     c.limpiarPantalla();
 }

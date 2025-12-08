@@ -19,14 +19,14 @@ class Usuarios{
         string resenas[TAM*2];
         int anio;
         float puntuacion;
-
+        
+    public:
         struct Resena{
             char titulo[100];
             char resena[500];
             int aprobada; // 0 = no aprobada, 1 = aprobada
         };
-        
-    public:
+
         Control c;
 
     void menuUsuario(){
