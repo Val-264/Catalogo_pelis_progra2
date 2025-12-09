@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
 #include <algorithm>
 #include "peliculas.h"
 using namespace std;
@@ -187,7 +186,9 @@ class Usuarios{
         archivoMejores.close();
 
         //Mostrar las mejores peliculas
+        SetConsoleTextAttribute(hConsole, CIAN);
         cout << "\n--- MEJORES PELICULAS ---\n";
+        SetConsoleTextAttribute(hConsole, BLANCO);
         for (int i = 0; i < cont; i++) {
             cout << "-----------------------------\n";
             cout << "Titulo: " << lista[i].mTitulo << "\n";
@@ -325,7 +326,7 @@ class Usuarios{
             archivo.clear();
             archivo.seekg(0, ios::beg); // Volver al inicio del archivo para nueva busqueda
             mostrarEncabezado = 0;
-            
+
             while (archivo.read((char*)&p, sizeof(Pelicula))) {
                 if (strcmp(p.getGenero(), generoBuscado) == 0) {
                     encontrado = true;

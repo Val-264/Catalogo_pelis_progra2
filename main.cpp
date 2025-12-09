@@ -2,6 +2,7 @@
 #include <cstring>
 #include "admin.h"
 #include "usuario.h"
+#include "animacion.h"
 using namespace std;
 
 int main(int argc, const char* argv[]){
@@ -10,12 +11,17 @@ int main(int argc, const char* argv[]){
 
     Administrador admin;
     Usuarios u;
-
     // Verificar que no haya más de dos elementos y que la clave sea correcta
     if(argc!=2 || (strcmp(argv[1],claveAdmin)!=0 && strcmp(argv[1],claveUsuario)!=0)) cout << "Clave incorrecta";
     // Mostrar menú de usuario o administrador dependiendo de la clave ingresada
-    else if(strcmp(argv[1],claveAdmin)==0) admin.mostrarMenu();
-    else u.menuUsuario();
+    else if(strcmp(argv[1],claveAdmin)==0) {
+        animacionInicial();
+        admin.mostrarMenu();
+    }
+    else {
+        animacionInicial();
+        u.menuUsuario();
+    }
 
     return 0;
 }

@@ -169,7 +169,7 @@ void Pelicula::getSinopsis(const char* tituloSinopsis){
     sps.close();
 }
 
-void Pelicula::elegirGeneros(char* retorno){ // Si llamada = 0 es del administrador, si llamada = 1es del usuario
+void Pelicula::elegirGeneros(char* retorno){ 
     Control c;
 
     float opc;
@@ -356,7 +356,6 @@ bool Pelicula::catalogoExistente() {
 
 /*
 Buscar y mostrar reseñas aprobadas de una pelicula 
-@param titPeli: titulo de la pelicula buscada 
 */
 void Pelicula::mostrarResena(const char* titPeli) {
     fstream resenias;

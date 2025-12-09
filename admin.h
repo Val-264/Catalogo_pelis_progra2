@@ -884,7 +884,7 @@ void Administrador::revisarCatalogo(){
         SetConsoleTextAttribute(hConsole, CIAN);
         cout << "\nPeliculas existentes en el catalogo:\n";
         SetConsoleTextAttribute(hConsole, BLANCO);
-        cout << "--------------------------------";
+        cout << "--------------------------------\n";
         Pelicula registro;
         int totalPelis = c.getContador((char*)"Total");
             
@@ -897,7 +897,7 @@ void Administrador::revisarCatalogo(){
 
             if (registro.getAnio() == 0) break; // Terminar si el año es cero (no hay películas con año = 0)
             
-            cout << "\nTitulo: " << registro.getTitulo();
+            cout << "Titulo: " << registro.getTitulo();
             cout << "\nDirector: " << registro.getDirector();
             cout << "\nGenero: " << registro.getGenero();
             cout << "\nAnio: " << registro.getAnio();

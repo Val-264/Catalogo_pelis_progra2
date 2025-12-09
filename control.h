@@ -76,9 +76,6 @@ class Control {
 
         /*
         Aumentar el total de peliculas y el total de un género específico
-        @param total: es la palabra total para referise al total de películas
-        @param genero: nombre del genero específico 
-        @param accion: si es 0, decrementa, si es 1, aumenta 
         */  
         void setContadores(char* total, char* genero, Accion accion) { 
             fstream contadores;
