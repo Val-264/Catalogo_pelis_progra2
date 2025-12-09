@@ -5,7 +5,6 @@
 #include <string.h>
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include <cmath>
 #include <windows.h> // Para colores 
 #include "control.h"

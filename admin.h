@@ -495,7 +495,7 @@ void Administrador::eliminarPelicula() {
         return;
     }
     
-    temporal.open("temp.dat", ios::binary | ios::out | ios::app); // Abrir archivo temporal para escritura
+    temporal.open("temp.dat", ios::binary | ios:: in | ios::out ); // Abrir archivo temporal para escritura
     if(!temporal) {
         SetConsoleTextAttribute(hConsole, ROJO);
         cerr << "\nNo se puedo abrir el archivo temporal para eliminar pelicula\n";

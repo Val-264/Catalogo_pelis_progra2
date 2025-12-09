@@ -19,14 +19,14 @@ class Usuarios{
         string resenas[TAM*2];
         int anio;
         float puntuacion;
+
+        // Estructura para mostrar peliculas mejor valoradas
+        struct Datos_peli_valorar {
+            char mTitulo[TAM];
+            float mPuntuacion;
+        };
         
     public:
-        struct Resena{
-            char titulo[100];
-            char resena[500];
-            int aprobada; // 0 = no aprobada, 1 = aprobada
-        };
-
         Control c;
 
     void menuUsuario(){
@@ -113,11 +113,11 @@ class Usuarios{
             cout << "Director: " << p.getDirector() << "\n";
             cout << "Genero: " << p.getGenero() << "\n";
             cout << "Anio: " << p.getAnio() << "\n";
-            cout << "Puntuacion: " << p.getPuntuacion() << "\n";
+            cout << "Puntuacion: " << p.getPuntuacion();
             p.getSinopsis(p.getTitulo());
             cout << "\nResena: ";
             p.mostrarResena(p.getTitulo());
-            cout << "--------------------------------\n";
+            cout << "\n--------------------------------\n";
         }
 
         archivo.close();
@@ -145,53 +145,57 @@ class Usuarios{
         }
 
         //vector para almacenar las mejores peliculas
-        vector<pair<string, float>> lista;
+        int totPelis = c.getContador((char*)"Total");
+        Datos_peli_valorar *lista = new Datos_peli_valorar[totPelis];
 
         //Leer las peliculas 
+        int pelisLeidas = 0;
         while(archivo.read((char*)&p, sizeof(Pelicula))) {
-            string titulo = p.getTitulo();
-            float puntuacion = p.getPuntuacion();
-            
-            lista.push_back(make_pair(titulo, puntuacion));
+            if (p.getAnio() == 0) break;
+            strcpy(lista[pelisLeidas].mTitulo, p.getTitulo());
+            lista[pelisLeidas].mPuntuacion = p.getPuntuacion();
+            pelisLeidas++;
         }
         archivo.close();
-
-        if (lista.empty()) {
-        cout << "No hay peliculas registradas.\n";
-        return;
-        }
         
         //Ordenar la lista de mayor a menor
-        sort(lista.begin(), lista.end(), 
-            [](const pair<string, float>& a, const pair<string, float>& b) {
-            return a.second > b.second;
+        sort(lista, (lista + pelisLeidas), 
+            [](const Datos_peli_valorar& a, const Datos_peli_valorar& b) {
+            return a.mPuntuacion > b.mPuntuacion;
         }
         );
 
         //Crear archivo para las mejores peliculas
         ofstream archivoMejores("mejoresPel.dat", ios::binary | ios::trunc);
         if (!archivoMejores.is_open()) {
+            SetConsoleTextAttribute(hConsole, ROJO);
             cout << "No se pudo crear mejoresPel.dat\n";
+            SetConsoleTextAttribute(hConsole, BLANCO);
             return;
         }
 
-        for(auto &pel : lista ) {
-            int tam =pel.first.size();
+        // Guardar maximo las 10 mejores 
+        int cont = 0;
+        for(int i = 0; i < totPelis; i++) {
+            if(i >= 10) break;
+            int tam = strlen(lista[i].mTitulo);
             archivoMejores.write((char*)&tam, sizeof(int));
-            archivoMejores.write(pel.first.c_str(), tam);
-            archivoMejores.write((char*)&pel.second, sizeof(float));
+            archivoMejores.write(lista[i].mTitulo, tam);
+            archivoMejores.write((char*)&lista[i].mPuntuacion, sizeof(float));
+            cont++;
         }
         archivoMejores.close();
 
         //Mostrar las mejores peliculas
         cout << "\n--- MEJORES PELICULAS ---\n";
-        for (auto &pel : lista) {
+        for (int i = 0; i < cont; i++) {
             cout << "-----------------------------\n";
-            cout << "Titulo: " << pel.first << "\n";
-            cout << "Puntuacion: " << pel.second << "\n";
+            cout << "Titulo: " << lista[i].mTitulo << "\n";
+            cout << "Puntuacion: " << lista[i].mPuntuacion << "\n";
         }
         cout << "-----------------------------\n";
 
+        delete[] lista; // Liberar memoria
         c.limpiarPantalla();
     }
         
@@ -312,6 +316,34 @@ class Usuarios{
                 cout << "\nResenia: ";
                 p.mostrarResena(p.getTitulo());
                 cout << "\n--------------------------------\n";
+            }
+        }
+
+        // Volver a buscar en caso de que se trate de otro genero 
+        if (!encontrado && strcmp(generoBuscado,c.generos[7]) != 0) {
+            strcpy(generoBuscado,c.generos[7]);
+            archivo.clear();
+            archivo.seekg(0, ios::beg); // Volver al inicio del archivo para nueva busqueda
+            mostrarEncabezado = 0;
+            
+            while (archivo.read((char*)&p, sizeof(Pelicula))) {
+                if (strcmp(p.getGenero(), generoBuscado) == 0) {
+                    encontrado = true;
+                    mostrarEncabezado++;
+                    if (mostrarEncabezado == 1) {
+                        SetConsoleTextAttribute(hConsole, VERDE);
+                        cout << "\n----- PELICULA CON GENERO ALTERNATIVO -----\n";
+                        SetConsoleTextAttribute(hConsole, BLANCO);
+                    }
+                    cout << "Titulo: " << p.getTitulo() << "\n";
+                    cout << "Director: " << p.getDirector() << "\n";
+                    cout << "Anio: " << p.getAnio() << "\n";
+                    cout << "Puntuacion: " << p.getPuntuacion();
+                    p.getSinopsis(p.getTitulo());
+                    cout << "\nResenia: ";
+                    p.mostrarResena(p.getTitulo());
+                    cout << "\n--------------------------------\n";
+                }
             }
         }
 
